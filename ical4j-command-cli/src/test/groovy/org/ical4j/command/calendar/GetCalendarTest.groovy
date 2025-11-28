@@ -2,14 +2,14 @@ package org.ical4j.command.calendar
 
 import org.ical4j.command.collection.GetCalendar
 import org.ical4j.connector.CalendarCollection
-import org.ical4j.connector.CalendarStore
+import org.ical4j.connector.ObjectStore
 import spock.lang.Specification
 
 class GetCalendarTest extends Specification {
 
     def 'test get calendar'() {
         given: 'a mock calendar collection'
-        CalendarStore store = Mock()
+        ObjectStore store = Mock()
         CalendarCollection collection = Mock()
 
         when: 'a get calendar command is run'

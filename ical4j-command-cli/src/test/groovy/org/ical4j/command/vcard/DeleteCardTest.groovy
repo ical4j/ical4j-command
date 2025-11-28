@@ -2,14 +2,14 @@ package org.ical4j.command.vcard
 
 import org.ical4j.command.collection.DeleteCard
 import org.ical4j.connector.CardCollection
-import org.ical4j.connector.CardStore
+import org.ical4j.connector.ObjectStore
 import spock.lang.Specification
 
 class DeleteCardTest extends Specification {
 
     def 'test delete card'() {
         given: 'a mock card collection'
-        CardStore store = Mock()
+        ObjectStore store = Mock()
         CardCollection collection = Mock()
 
         when: 'a delete card command is run'

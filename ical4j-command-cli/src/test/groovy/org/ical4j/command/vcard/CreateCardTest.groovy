@@ -4,14 +4,14 @@ package org.ical4j.command.vcard
 import net.fortuna.ical4j.vcard.VCard
 import org.ical4j.command.collection.CreateCard
 import org.ical4j.connector.CardCollection
-import org.ical4j.connector.CardStore
+import org.ical4j.connector.ObjectStore
 import spock.lang.Specification
 
 class CreateCardTest extends Specification {
 
     def 'test create card'() {
         given: 'a mock card store'
-        CardStore store = Mock()
+        ObjectStore store = Mock()
         CardCollection collection = Mock()
 
         and: 'a vcard instance'

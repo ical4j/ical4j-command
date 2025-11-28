@@ -3,14 +3,14 @@ package org.ical4j.command.calendar
 import net.fortuna.ical4j.model.Calendar
 import org.ical4j.command.collection.UpdateCalendar
 import org.ical4j.connector.CalendarCollection
-import org.ical4j.connector.CalendarStore
+import org.ical4j.connector.ObjectStore
 import spock.lang.Specification
 
 class UpdateCalendarTest extends Specification {
 
     def 'test update calendar'() {
         given: 'a mock calendar collection'
-        CalendarStore store = Mock()
+        ObjectStore store = Mock()
         CalendarCollection collection = Mock()
         store.getCollection(_) >> collection
 

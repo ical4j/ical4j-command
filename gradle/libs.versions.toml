@@ -1,0 +1,42 @@
+[versions]
+ical4j = "4.2.1"
+ical4j-vcard = "2.0.1"
+ical4j-extensions = "2.0.0"
+ical4j-connector = "2.0.0-alpha6-SNAPSHOT"
+ical4j-integration =  "0.3.1"
+ical4j-serializer = "0.3.2-develop-SNAPSHOT"
+groovy = "3.0.25"
+log4j = "2.25.2"
+spock = "2.4-M7-groovy-3.0"
+junitVintage = "5.14.1"
+picocli = "4.6.3"
+langchain4j = "1.7.1"
+spring-ai = "1.1.0"
+spring-boot = "3.5.7"
+
+[libraries]
+ical4j = { module = "org.mnode.ical4j:ical4j", version.ref = "ical4j" }
+ical4j-vcard = { module = "org.mnode.ical4j:ical4j-vcard", version.ref = "ical4j-vcard" }
+ical4j-extensions = { module = "org.mnode.ical4j:ical4j-extensions", version.ref = "ical4j-extensions" }
+ical4j-connector-api = { module = "org.ical4j:ical4j-connector-api", version.ref = "ical4j-connector" }
+ical4j-integration-api = { module = "org.ical4j:ical4j-integration-api", version.ref = "ical4j-integration" }
+ical4j-serializer = { module = "org.ical4j:ical4j-serializer", version.ref = "ical4j-serializer" }
+
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+
+langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
+langchain4j-openai = { module = "dev.langchain4j:langchain4j-open-ai", version.ref = "langchain4j" }
+
+spring-ai = { module = "org.springframework.ai:spring-ai-starter-mcp-server", version.ref = "spring-ai" }
+spring-boot-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot"}
+
+groovy = { module = "org.codehaus.groovy:groovy", version.ref = "groovy"}
+groovy-test = { module = "org.codehaus.groovy:groovy-test", version.ref = "groovy"}
+
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j"}
+log4j-slf4j2 = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j"}
+
+spock-bom = { module = "org.spockframework:spock-bom", version.ref = "spock"}
+spock-core = { module = "org.spockframework:spock-core", version.ref = "spock"}
+
+junit-jupiter = { group = "org.junit.jupiter", name="junit-jupiter", version.ref = "junitVintage"}

@@ -1,0 +1,5 @@
+rootProject.name = 'ical4j-command'
+
+include "ical4j-command-cli"
+//include "ical4j-command-agent"
+//include "ical4j-command-mcp"

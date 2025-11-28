@@ -1,67 +1,7 @@
 plugins {
-    id 'java'
-    id 'java-library'
-    id 'groovy'
     id "biz.aQute.bnd.builder" version "$bndVersion"
-    id 'maven-publish'
     id 'signing'
     id 'pl.allegro.tech.build.axion-release' version '1.13.6'
-    id 'application'
-}
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots'
-    }
-    maven {
-        url 'https://s01.oss.sonatype.org/content/repositories/snapshots'
-    }
-}
-
-sourceCompatibility = 11
-targetCompatibility = 11
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
-test {
-    useJUnitPlatform()
-}
-
-dependencies {
-    api "org.ical4j:ical4j-connector-api:$ical4jConnectorVersion",
-            "org.ical4j:ical4j-integration-api:$ical4jIntegrationVersion",
-            "org.ical4j:ical4j-serializer:$ical4jSerializerVersion",
-            "org.mnode.ical4j:ical4j-vcard:$ical4jVCardVersion",
-            "org.mnode.ical4j:ical4j:$ical4jVersion"
-
-    implementation "org.apache.logging.log4j:log4j-core:$log4jVersion",
-            "org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion"
-
-//    implementation ("org.eclipse.jetty:jetty-server:$jettyVersion") {
-//        exclude group: 'org.slf4j', module: 'slf4j-api'
-//    }
-//    implementation ("org.eclipse.jetty:jetty-servlet:$jettyVersion") {
-//        exclude group: 'org.slf4j', module: 'slf4j-api'
-//    }
-//    implementation 'org.glassfish.jersey.containers:jersey-container-jetty-http:3.1.1',
-//            'org.glassfish.jersey.inject:jersey-hk2:3.1.1'
-
-    implementation "info.picocli:picocli:$picocliVersion"
-
-//    compileOnly "biz.aQute.bnd:biz.aQute.bndlib:$bndVersion"
-    compileOnly 'org.osgi:osgi.core:8.0.0',
-            'org.osgi:org.osgi.service.component.annotations:1.5.0',
-            'org.osgi:org.osgi.service.metatype.annotations:1.4.1',
-            'org.osgi:org.osgi.annotation:6.0.0'
-    // spock
-    testImplementation platform("org.spockframework:spock-bom:$spockVersion"),
-            "org.spockframework:spock-core"
-
 }
 
 scmVersion {
@@ -76,68 +16,117 @@ scmVersion {
     }
 }
 
-group = 'org.ical4j'
-description = 'Manipulate iCalendar data'
-version = scmVersion.version
+configure(subprojects) {
 
-jar {
-    manifest {
-        attributes (
-            'Implementation-Title': 'iCal4j User Agent',
-            'Implementation-Version': version,
-            'Implementation-Vendor': 'Ben Fortuna'
-        )
-    }
-}
-
-application {
-    mainClass = 'org.ical4j.command.CommandMain'
-    applicationName = 'ical4j'
-}
-
-ext {
-    isReleaseVersion = !version.endsWith("SNAPSHOT")
-}
-
-publishing {
-    publications {
-        ical4j_command(MavenPublication) {
-            from components.java
-            pom.withXml {
-                asNode().appendNode('name', project.name)
-                asNode().appendNode('description', project.description)
-                asNode().appendNode('url', 'http://ical4j.github.io')
-
-                def scmNode = asNode().appendNode('scm')
-                scmNode.appendNode('url', 'https://github.com/ical4j/ical4j-command')
-                scmNode.appendNode('connection', 'scm:git@github.com:ical4j/ical4j-command.git')
-                scmNode.appendNode('developerConnection', 'scm:git@github.com:ical4j/ical4j-command.git')
-
-                def licenseNode = asNode().appendNode('licenses').appendNode('license')
-                licenseNode.appendNode('name', 'iCal4j - License')
-                licenseNode.appendNode('url', 'https://raw.githubusercontent.com/ical4j/ical4j/master/LICENSE')
-                licenseNode.appendNode('distribution', 'repo')
-
-                def developerNode = asNode().appendNode('developers').appendNode('developer')
-                developerNode.appendNode('id', 'fortuna')
-                developerNode.appendNode('name', 'Ben Fortuna')
-            }
-        }
-    }
+    apply plugin: 'java-library'
+    apply plugin: 'groovy'
+    apply plugin: 'maven-publish'
 
     repositories {
+        mavenCentral()
+        mavenLocal()
         maven {
-            name = "OSSRH"
-            url = version.endsWith('SNAPSHOT') ? "https://s01.oss.sonatype.org/content/repositories/snapshots/" : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
+        }
+        maven {
+            url 'https://s01.oss.sonatype.org/content/repositories/snapshots'
+        }
+    }
+
+    sourceCompatibility = 17
+    targetCompatibility = 17
+
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    dependencies {
+        api libs.ical4j.connector.api, libs.ical4j.integration.api, libs.ical4j.serializer,
+                libs.ical4j.vcard, libs.ical4j, libs.ical4j.extensions
+
+
+//    implementation ("org.eclipse.jetty:jetty-server:$jettyVersion") {
+//        exclude group: 'org.slf4j', module: 'slf4j-api'
+//    }
+//    implementation ("org.eclipse.jetty:jetty-servlet:$jettyVersion") {
+//        exclude group: 'org.slf4j', module: 'slf4j-api'
+//    }
+//    implementation 'org.glassfish.jersey.containers:jersey-container-jetty-http:3.1.1',
+//            'org.glassfish.jersey.inject:jersey-hk2:3.1.1'
+
+//    compileOnly "biz.aQute.bnd:biz.aQute.bndlib:$bndVersion"
+        compileOnly 'org.osgi:osgi.core:8.0.0',
+                'org.osgi:org.osgi.service.component.annotations:1.5.0',
+                'org.osgi:org.osgi.service.metatype.annotations:1.4.1',
+                'org.osgi:org.osgi.annotation:6.0.0'
+        // spock
+        testImplementation platform(libs.spock.bom), libs.spock.core
+
+    }
+
+    group = 'org.ical4j'
+    description = 'Manipulate iCalendar data'
+    version = scmVersion.version
+
+    jar {
+        manifest {
+            attributes(
+                    'Implementation-Title': 'iCal4j User Agent',
+                    'Implementation-Version': version,
+                    'Implementation-Vendor': 'Ben Fortuna'
+            )
+        }
+    }
+
+    ext {
+        isReleaseVersion = !version.endsWith("SNAPSHOT")
+    }
+
+    publishing {
+        publications {
+            ical4j_command(MavenPublication) {
+                from components.java
+                pom.withXml {
+                    asNode().appendNode('name', project.name)
+                    asNode().appendNode('description', project.description)
+                    asNode().appendNode('url', 'http://ical4j.github.io')
+
+                    def scmNode = asNode().appendNode('scm')
+                    scmNode.appendNode('url', 'https://github.com/ical4j/ical4j-command')
+                    scmNode.appendNode('connection', 'scm:git@github.com:ical4j/ical4j-command.git')
+                    scmNode.appendNode('developerConnection', 'scm:git@github.com:ical4j/ical4j-command.git')
+
+                    def licenseNode = asNode().appendNode('licenses').appendNode('license')
+                    licenseNode.appendNode('name', 'iCal4j - License')
+                    licenseNode.appendNode('url', 'https://raw.githubusercontent.com/ical4j/ical4j/master/LICENSE')
+                    licenseNode.appendNode('distribution', 'repo')
+
+                    def developerNode = asNode().appendNode('developers').appendNode('developer')
+                    developerNode.appendNode('id', 'fortuna')
+                    developerNode.appendNode('name', 'Ben Fortuna')
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "OSSRH"
+                url = version.endsWith('SNAPSHOT') ? "https://s01.oss.sonatype.org/content/repositories/snapshots/" : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username = System.getenv("MAVEN_USERNAME")
+                    password = System.getenv("MAVEN_PASSWORD")
+                }
             }
         }
     }
-}
 
-signing {
-    required { isReleaseVersion }
-    sign publishing.publications.ical4j_command
+    signing {
+        required { isReleaseVersion }
+        sign publishing.publications.ical4j_command
+    }
 }

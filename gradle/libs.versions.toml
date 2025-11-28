@@ -2,7 +2,7 @@
 ical4j = "4.2.1"
 ical4j-vcard = "2.0.1"
 ical4j-extensions = "2.0.0"
-ical4j-connector = "2.0.0-alpha6-SNAPSHOT"
+ical4j-connector = "2.0.0-beta1"
 ical4j-integration =  "0.3.1"
 ical4j-serializer = "0.3.2-develop-SNAPSHOT"
 groovy = "3.0.25"

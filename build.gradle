@@ -73,16 +73,6 @@ configure(subprojects) {
     description = 'Manipulate iCalendar data'
     version = scmVersion.version
 
-    jar {
-        manifest {
-            attributes(
-                    'Implementation-Title': 'iCal4j User Agent',
-                    'Implementation-Version': version,
-                    'Implementation-Vendor': 'Ben Fortuna'
-            )
-        }
-    }
-
     ext {
         isReleaseVersion = !version.endsWith("SNAPSHOT")
     }

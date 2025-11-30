@@ -4,5 +4,23 @@ dependencies {
     implementation libs.picocli
 
     implementation libs.log4j.core, libs.log4j.slf4j2
+}
 
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': 'iCal4j CLI',
+                'Implementation-Version': version,
+                'Implementation-Vendor': 'Ben Fortuna'
+        )
+    }
+}
+
+application {
+    mainClass = 'org.ical4j.command.CommandMain'
+}
+
+startScripts {
+    applicationName = 'ict'
+    classpath = files('lib/*')
 }

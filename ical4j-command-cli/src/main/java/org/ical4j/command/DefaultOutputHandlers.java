@@ -9,6 +9,7 @@ import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.validate.ValidationReport;
 import net.fortuna.ical4j.validate.ValidationResult;
+import net.fortuna.ical4j.vcard.VCard;
 import org.mnode.ical4j.serializer.JCalSerializer;
 import org.mnode.ical4j.serializer.XCalSerializer;
 
@@ -40,6 +41,17 @@ public interface DefaultOutputHandlers {
         return calendar -> {
             try {
                 new CalendarOutputter(true).output(calendar, out);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    static Consumer<VCard> VALIDATING_VCARD_PRINTER(Writer out) {
+        return card -> {
+            try {
+                out.write(card.toString());
+                out.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

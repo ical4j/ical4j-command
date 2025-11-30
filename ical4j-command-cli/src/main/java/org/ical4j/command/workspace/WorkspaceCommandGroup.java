@@ -1,7 +1,6 @@
-package org.ical4j.command;
+package org.ical4j.command.workspace;
 
 import org.ical4j.command.collection.ListObjectUids;
-import org.ical4j.command.workspace.*;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "workspace", description = "Calendar and card workspace operations",

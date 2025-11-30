@@ -1,6 +1,5 @@
-package org.ical4j.command;
+package org.ical4j.command.entity;
 
-import org.ical4j.command.vcard.Serializer;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "card", description = "vCard operations",

@@ -5,6 +5,8 @@ import net.fortuna.ical4j.filter.ComponentFilter;
 import net.fortuna.ical4j.filter.FilterExpression;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import org.ical4j.connector.ObjectNotFoundException;
+import org.ical4j.connector.ObjectStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -42,6 +44,8 @@ public class FilterCalendar extends AbstractCalendarCommand<List<CalendarCompone
         } catch (IOException | ParserException e) {
             LOGGER.error("Unexpected error", e);
             return 1;
+        } catch (ObjectStoreException | ObjectNotFoundException e) {
+            throw new RuntimeException(e);
         }
         return 0;
     }

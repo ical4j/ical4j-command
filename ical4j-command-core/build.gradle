@@ -1,0 +1,12 @@
+// Shared command vocabulary module: vocabulary definitions only, no dispatch/execution.
+// Plugins and common dependencies are applied by the root `configure(subprojects)` block.
+
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': 'iCal4j Command Core',
+                'Implementation-Version': version,
+                'Implementation-Vendor': 'Ben Fortuna'
+        )
+    }
+}

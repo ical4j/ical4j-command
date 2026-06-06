@@ -1,11 +1,12 @@
 package org.ical4j.command.collection;
 
+import org.ical4j.command.ImportCalendars;
+import org.ical4j.command.ListCommand;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "collections", description = "Manage calendar and card collections",
-        subcommands = {GetCalendar.class, ListCalendars.class, CreateCalendar.class, UpdateCalendar.class,
-                DeleteCalendar.class, GetCard.class, ListCards.class, CreateCard.class, UpdateCard.class,
-                DeleteCard.class,})
+        subcommands = {AddCollection.class, ListCommand.class,
+                RemoveCollection.class, ImportCalendars.class})
 public class CollectionCommandGroup {
 
 }

@@ -1,0 +1,10 @@
+[user]
+    agent = "ical4j-command-tool/1.0"
+
+[workpace]
+    active = "default"
+
+[contentType]
+    default = "text/plain"
+
+[filters]

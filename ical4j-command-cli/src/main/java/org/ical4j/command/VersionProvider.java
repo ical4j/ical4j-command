@@ -19,7 +19,7 @@ public class VersionProvider implements CommandLine.IVersionProvider {
 
     @Override
     public String[] getVersion() {
-        return new String[] {String.format("iCal4j Command %s (ical4j=%s, jvm=%s)",
+        return new String[] {String.format("iCal4j Command-line Tool %s (ical4j=%s, java=%s)",
                 commandVersion, ical4jVersion, javaVersion)
         };
     }

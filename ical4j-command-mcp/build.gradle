@@ -1,0 +1,17 @@
+plugins {
+    id 'org.springframework.boot' version '3.5.7'
+}
+
+apply plugin: 'application'
+
+dependencies {
+    api project(':ical4j-command-core')
+    api project(':ical4j-command-cli')
+
+    implementation libs.spring.ai, libs.spring.boot.web
+}
+
+application {
+    mainClass = 'org.ical4j.command.mcp.iCal4jMcpServerMain'
+    applicationName = 'ical4j-command-mcp-server'
+}

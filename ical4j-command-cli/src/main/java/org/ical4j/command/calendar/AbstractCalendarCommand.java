@@ -4,6 +4,8 @@ import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import org.ical4j.command.AbstractCommand;
 import org.ical4j.command.InputOptions;
+import org.ical4j.connector.ObjectNotFoundException;
+import org.ical4j.connector.ObjectStoreException;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -45,7 +47,7 @@ public abstract class AbstractCalendarCommand<T> extends AbstractCommand<T> {
         return this;
     }
 
-    public Calendar getCalendar() throws ParserException, IOException {
+    public Calendar getCalendar() throws ParserException, IOException, ObjectStoreException, ObjectNotFoundException {
         if (calendar == null) {
             calendar = input.toCalendar();
         }

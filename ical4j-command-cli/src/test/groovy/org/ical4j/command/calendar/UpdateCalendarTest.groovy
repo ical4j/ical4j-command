@@ -1,7 +1,6 @@
 package org.ical4j.command.calendar
 
 import net.fortuna.ical4j.model.Calendar
-import org.ical4j.command.collection.UpdateCalendar
 import org.ical4j.connector.CalendarCollection
 import org.ical4j.connector.ObjectStore
 import spock.lang.Specification

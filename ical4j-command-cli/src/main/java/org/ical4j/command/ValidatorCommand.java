@@ -55,18 +55,12 @@ public class ValidatorCommand extends AbstractCommand<ValidationResult> {
     @CommandLine.ArgGroup(multiplicity = "1")
     private InputOptions input;
 
-    @CommandLine.Option(names = "--mode", interactive = true, arity = "0..1",
+    @CommandLine.Option(names = "--mode",
             description = "Valid values: ${COMPLETION-CANDIDATES}", defaultValue = "ICALENDAR")
     private ValidationMode mode;
 
-    @CommandLine.Option(names = "--lenient", description = "Enable lenient parsing")
-    private boolean lenient;
-
     @Override
     public Integer call() throws Exception {
-        if (lenient) {
-            System.setProperty("ical4j.parsing.relaxed", "true");
-        }
         try {
             ValidationResult result;
             switch (mode) {

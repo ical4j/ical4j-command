@@ -34,6 +34,16 @@ public abstract class AbstractWorkspaceCommand<T extends ObjectCollection<?>, R>
         this.store = store;
     }
 
+    public AbstractWorkspaceCommand<T, R> withStore(ObjectStore<T> store) {
+        this.store = store;
+        return this;
+    }
+
+    public AbstractWorkspaceCommand<T, R> withWorkspace(String workspace) {
+        this.workspace = workspace;
+        return this;
+    }
+
     public String getWorkspace() {
         return workspace;
     }

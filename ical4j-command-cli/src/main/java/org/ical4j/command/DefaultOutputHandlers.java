@@ -15,6 +15,7 @@ import org.mnode.ical4j.serializer.XCalSerializer;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -84,8 +85,10 @@ public interface DefaultOutputHandlers {
      * @return a consumer instance
      * @param <T> command result type
      */
-    static <T extends List<?>> Consumer<T> STDOUT_LIST_PRINTER() {
-        return (t) -> t.forEach(System.out::println);
+    static <T extends Collection<?>> Consumer<T> STDOUT_LIST_PRINTER() {
+        List<?> ignoredFiles = List.of(".DS_Store");
+        return (T objects) -> objects.stream().filter(o -> !ignoredFiles.contains(o))
+                .forEach(System.out::println);
     }
 
     /**

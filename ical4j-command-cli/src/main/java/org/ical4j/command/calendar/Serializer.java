@@ -106,11 +106,11 @@ public class Serializer extends AbstractCalendarCommand<String> {
     private ObjectMapper serializeJotn(String[] filter) {
         SimpleModule module = new SimpleModule();
         if (filter != null) {
-            module.addSerializer(Calendar.class, new CalendarSerializer(null, filter));
+            module.addSerializer(Calendar.class, new CalendarSerializer(filter));
         } else {
-            module.addSerializer(Calendar.class, new CalendarSerializer(null));
-            module.addSerializer(VEvent.class, new VEventSerializer(null));
-            module.addSerializer(VTimeZone.class, new VTimeZoneSerializer(null));
+            module.addSerializer(Calendar.class, new CalendarSerializer());
+            module.addSerializer(VEvent.class, new VEventSerializer());
+            module.addSerializer(VTimeZone.class, new VTimeZoneSerializer());
         }
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(module);

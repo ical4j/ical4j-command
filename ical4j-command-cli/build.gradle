@@ -1,6 +1,8 @@
 apply plugin: 'application'
 
 dependencies {
+    api project(':ical4j-command-core')
+
     implementation libs.picocli, libs.night.config.toml
 
     implementation libs.log4j.core, libs.log4j.slf4j2

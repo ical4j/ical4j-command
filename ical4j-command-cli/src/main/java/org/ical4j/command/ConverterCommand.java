@@ -6,9 +6,14 @@ import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.vcard.VCard;
 import org.mnode.ical4j.serializer.JCalSerializer;
 import org.mnode.ical4j.serializer.XCalSerializer;
+import org.mnode.ical4j.serializer.jmap.JSCardSerializer;
+import org.mnode.ical4j.serializer.jotn.CalendarSerializer;
 import picocli.CommandLine;
+
+import java.util.EnumSet;
 
 /*
  * Copyright (c) 2025, Ben Fortuna
@@ -48,7 +53,8 @@ public class ConverterCommand extends AbstractCommand<String> {
         JCAL, XCAL,
         JCARD, XCARD,
         JSCALENDAR, JSCARD,
-        JSONLD, RDF
+        JSONLD, RDF,
+        JOTN
     }
 
     /**
@@ -78,6 +84,18 @@ public class ConverterCommand extends AbstractCommand<String> {
                         .with(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME));
                 objectMapper.registerModule(module);
             }
+            case JSCARD -> {
+                SimpleModule module = new SimpleModule();
+                module.addSerializer(VCard.class, new JSCardSerializer(VCard.class));
+                objectMapper = new ObjectMapper();
+                objectMapper.registerModule(module);
+            }
+            case JOTN -> {
+                SimpleModule module = new SimpleModule();
+                module.addSerializer(Calendar.class, new CalendarSerializer());
+                objectMapper = new ObjectMapper();
+                objectMapper.registerModule(module);
+            }
             default -> {
                 SimpleModule module = new SimpleModule();
                 module.addSerializer(Calendar.class, new JCalSerializer(null));
@@ -85,11 +103,20 @@ public class ConverterCommand extends AbstractCommand<String> {
                 objectMapper.registerModule(module);
             }
         }
-        if (prettyPrint) {
-            getOutputHandler().accept(objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(input.toCalendar()));
+        if (EnumSet.of(Format.JCARD, Format.JSCARD).contains(format)) {
+            if (prettyPrint) {
+                getOutputHandler().accept(objectMapper.writerWithDefaultPrettyPrinter()
+                        .writeValueAsString(input.toVCard()));
+            } else {
+                getOutputHandler().accept(objectMapper.writeValueAsString(input.toVCard()));
+            }
         } else {
-            getOutputHandler().accept(objectMapper.writeValueAsString(input.toCalendar()));
+            if (prettyPrint) {
+                getOutputHandler().accept(objectMapper.writerWithDefaultPrettyPrinter()
+                        .writeValueAsString(input.toCalendar()));
+            } else {
+                getOutputHandler().accept(objectMapper.writeValueAsString(input.toCalendar()));
+            }
         }
         return 0;
     }

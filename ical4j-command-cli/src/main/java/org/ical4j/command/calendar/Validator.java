@@ -3,6 +3,8 @@ package org.ical4j.command.calendar;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.validate.ValidationResult;
 import org.ical4j.command.DefaultOutputHandlers;
+import org.ical4j.connector.ObjectNotFoundException;
+import org.ical4j.connector.ObjectStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -31,6 +33,8 @@ public class Validator extends AbstractCalendarCommand<ValidationResult> {
         } catch (IOException | ParserException e) {
             LOGGER.error("Unexpected error", e);
             return 1;
+        } catch (ObjectStoreException | ObjectNotFoundException e) {
+            throw new RuntimeException(e);
         }
         return 0;
     }

@@ -1,0 +1,22 @@
+package org.ical4j.command.card
+
+
+import org.ical4j.connector.CardCollection
+import org.ical4j.connector.ObjectStore
+import spock.lang.Specification
+
+class DeleteCardTest extends Specification {
+
+    def 'test delete card'() {
+        given: 'a mock card collection'
+        ObjectStore store = Mock()
+        CardCollection collection = Mock()
+
+        when: 'a delete card command is run'
+        new DeleteCard('default', (card) -> {}, store).withCardUid('1234').call()
+
+        then: 'collection remove card is invoked'
+        1 * store.getCollection('default') >> collection
+        1 * collection.removeCard('1234')
+    }
+}

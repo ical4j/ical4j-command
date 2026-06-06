@@ -1,6 +1,6 @@
 package org.ical4j.command.calendar
 
-import org.ical4j.command.collection.DeleteCalendar
+
 import org.ical4j.connector.CalendarCollection
 import org.ical4j.connector.ObjectStore
 import spock.lang.Specification

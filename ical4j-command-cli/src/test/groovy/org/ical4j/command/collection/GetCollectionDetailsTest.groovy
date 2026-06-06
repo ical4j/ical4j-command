@@ -1,6 +1,6 @@
 package org.ical4j.command.collection
 
-import org.ical4j.command.workspace.GetCollectionDetails
+
 import org.ical4j.connector.ObjectStore
 import spock.lang.Specification
 

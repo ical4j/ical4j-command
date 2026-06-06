@@ -67,6 +67,7 @@ configure(subprojects) {
         // spock
         testImplementation platform(libs.spock.bom), libs.spock.core
 
+        testRuntimeOnly libs.junit.platform
     }
 
     group = 'org.ical4j'

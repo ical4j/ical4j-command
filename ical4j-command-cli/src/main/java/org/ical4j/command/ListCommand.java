@@ -39,8 +39,12 @@ public class ListCommand extends AbstractCommand<List<String>> {
     }
 
     public ListCommand(Consumer<List<String>> outputHandler) {
+        this(outputHandler, CommandConfig.INSTANCE);
+    }
+
+    public ListCommand(Consumer<List<String>> outputHandler, CommandConfig config) {
         super(outputHandler);
-        config = CommandConfig.INSTANCE;
+        this.config = config;
     }
 
     @Override

@@ -1,19 +1,22 @@
 package org.ical4j.command.collection;
 
-import org.ical4j.command.AbstractCommand;
 import org.ical4j.command.config.CommandConfig;
+import org.ical4j.command.workspace.AbstractWorkspaceCommand;
 import org.ical4j.connector.ObjectCollection;
 import org.ical4j.connector.ObjectNotFoundException;
+import org.ical4j.connector.ObjectStore;
 import org.ical4j.connector.ObjectStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
+import java.util.function.Consumer;
+
 /**
  * A command to create a new collection for a specified object store.
  */
 @CommandLine.Command(name = "mkcol", description = "Add a new collection")
-public class AddCollection extends AbstractCommand<String> {
+public class AddCollection extends AbstractWorkspaceCommand<ObjectCollection<?>, String> {
 
     public enum CollectionType {
         CALENDAR,
@@ -29,14 +32,30 @@ public class AddCollection extends AbstractCommand<String> {
             description = "Valid values: ${COMPLETION-CANDIDATES}", defaultValue = "CALENDAR")
     private CollectionType collectionType;
 
-    private String[] supportedComponents;
-
     public AddCollection() {
+    }
+
+    public AddCollection(Consumer<String> outputHandler, ObjectStore<ObjectCollection<?>> store) {
+        super(outputHandler);
+        setStore(store);
+    }
+
+    public AddCollection withCollectionName(String collectionName) {
+        this.collectionName = collectionName;
+        return this;
     }
 
     @Override
     public Integer call() {
         try {
+            // Injected store: add directly to the supplied store.
+            if (getStore() != null) {
+                getStore().addCollection(collectionName);
+                getOutputHandler().accept("Collection '" + collectionName + "' created successfully");
+                return 0;
+            }
+
+            // CLI path: resolve the appropriate store from configuration by type.
             ObjectCollection<?> collection = null;
             if (collectionType == CollectionType.CALENDAR) {
                 try {

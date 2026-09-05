@@ -1,1 +1,0 @@
-Import-Package: !org.eclipse.jetty.server, !org.eclipse.jetty.servlet, *

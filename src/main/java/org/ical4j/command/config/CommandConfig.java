@@ -33,6 +33,8 @@ package org.ical4j.command.config;
  */
 
 import com.electronwill.nightconfig.core.file.FileConfig;
+import com.electronwill.nightconfig.toml.TomlFormat;
+import org.ical4j.command.ops.Context;
 import org.ical4j.command.util.Filesystem;
 import org.ical4j.connector.CalendarCollection;
 import org.ical4j.connector.CardCollection;
@@ -43,21 +45,45 @@ import org.ical4j.connector.local.LocalCardStore;
 import java.io.File;
 
 /**
- * Persists command configuration.
+ * Persists command configuration in {@code <data dir>/iCal4j/ictrc.toml} and builds the
+ * {@link Context} that handlers receive. Surfaces construct one of these; handlers never do.
  */
 public class CommandConfig {
 
-    public static final CommandConfig INSTANCE = new CommandConfig();
+    /** Subdirectory of the data directory that holds the config file and the local stores. */
+    public static final String APP_DIR = "iCal4j";
+
+    private final File appDir;
 
     private final FileConfig fileConfig;
 
+    /**
+     * Configuration under the platform data directory (or {@code ICT_DATA_DIR}).
+     */
     public CommandConfig() {
-        this(FileConfig.builder(new File(Filesystem.getDataDirectory(), "iCal4j/ictrc.toml"))
-                .defaultResource("/ictrc.default").autosave().sync().build());
+        this(new File(Filesystem.getDataDirectory()));
     }
 
-    public CommandConfig(FileConfig fileConfig) {
-        this.fileConfig = fileConfig;
+    /**
+     * Configuration under an explicit data directory.
+     */
+    public CommandConfig(File dataDirectory) {
+        this.appDir = new File(dataDirectory, APP_DIR);
+        if (!appDir.isDirectory() && !appDir.mkdirs()) {
+            throw new IllegalStateException("Cannot create application directory " + appDir);
+        }
+        // The TOML format is passed explicitly: night-config's format detection probes
+        // TomlFormat with Class.forName, which a native image cannot see without metadata.
+        this.fileConfig = FileConfig.builder(new File(appDir, "ictrc.toml"), TomlFormat.instance())
+                .defaultResource("/ictrc.default.toml").autosave().sync().build();
+    }
+
+    public File dataDirectory() {
+        return appDir.getParentFile();
+    }
+
+    public File configFile() {
+        return fileConfig.getFile();
     }
 
     public String get(String key, String defaultValue) {
@@ -72,7 +98,7 @@ public class CommandConfig {
     }
 
     public String getUserAgent() {
-        return get("user.agent", "iCal4j-Command-Line/1.0");
+        return get("user.agent", "ict/1.0");
     }
 
     public String getUserEmail() {
@@ -99,18 +125,24 @@ public class CommandConfig {
         return set("workspace.active", workspaceId);
     }
 
+    public File calendarStoreDirectory() {
+        return new File(appDir, get("store.calendar.path", "calendars"));
+    }
+
     public ObjectStore<? extends CalendarCollection> getCalendarStore() {
-        return new LocalCalendarStore(new File(Filesystem.getDataDirectory(),
-                "iCal4j/" + get("store.calendar.path", "calendars")));
+        return new LocalCalendarStore(calendarStoreDirectory());
     }
 
     public String setCalendarStorePath(String path) {
         return set("store.calendar.path", path);
     }
 
+    public File cardStoreDirectory() {
+        return new File(appDir, get("store.card.path", "vcards"));
+    }
+
     public ObjectStore<? extends CardCollection> getCardStore() {
-        return new LocalCardStore(new File(Filesystem.getDataDirectory(), "iCal4j/" +
-                get("store.card.path", "vcards")));
+        return new LocalCardStore(cardStoreDirectory());
     }
 
     public String setCardStorePath(String path) {
@@ -128,5 +160,18 @@ public class CommandConfig {
 
     public String setDefaultContentType(String contentType) {
         return set("contentType.default", contentType);
+    }
+
+    /**
+     * The handler context for this configuration: the active workspace, lazily opened local
+     * stores, and standard input.
+     */
+    public Context context() {
+        return Context.builder()
+                .activeWorkspace(getActiveWorkspace())
+                .calendarStore(this::getCalendarStore)
+                .cardStore(this::getCardStore)
+                .stdin(() -> System.in)
+                .build();
     }
 }

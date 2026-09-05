@@ -114,7 +114,7 @@ that failed in 0.1 passes with this, 13 entries in total:
     { "type": "com.fasterxml.jackson.databind.ext.Java7SupportImpl", "methods": [{ "name": "<init>", "parameterTypes": [] }] }
   ],
   "resources": [
-    { "glob": "ictrc.default" }, { "glob": "log4j2.properties" }, { "glob": "ical4j.properties" },
+    { "glob": "ictrc.default.toml" }, { "glob": "simplelogger.properties" }, { "glob": "ical4j.properties" },
     { "glob": "net/fortuna/ical4j/model/tz.alias" }, { "glob": "tz.alias" },
     { "glob": "zoneinfo/**" }, { "glob": "zoneinfo-global/**" },
     { "glob": "net/fortuna/ical4j/transform/compliance/msTimezoneIds" },

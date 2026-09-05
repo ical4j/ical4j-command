@@ -58,6 +58,47 @@ Working natively without any extra metadata: `--version`, `--help` on every subc
   rejects any actual arguments. Confirms the strategy commands belong to the untested set.
 - `ict strategy` prints nothing and exits 0.
 
+## Task 0.2: tracing agent
+
+Two captures were taken on GraalVM CE 25 (JDK 25 ran the Groovy 3 / Spock suite without
+trouble):
+
+| Capture | How | Reflection entries | Resources | Signal |
+|---|---|---|---|---|
+| Test suite | `./gradlew -Pagent :ical4j-command-cli:test` with a caller filter excluding Spock, Groovy, JUnit and Gradle (`src/test/resources/native-agent/caller-filter.json`) | 507 | 52 | noisy: 243 log4j entries, Groovy `*BeanInfo`/`*Customizer` introspection, test-framework service files. The caller filter trims reflection but resource lookups still leak because the JDK is the caller |
+| Manual invocations | JVM `installDist` launched with `-agentlib:native-image-agent=config-merge-dir=...` running `validate`, `convert` (JCAL, XCAL, JSCALENDAR), `list-workspaces`, `--version`, a vCard `validate`, and a calendar whose `TZID`s have no `VTIMEZONE` | 369 | 44 | clean: `TomlFormat`, `tz.alias`, `msTimezoneIds/Names`, `zoneinfo/tz.availableIds`, the two `zoneinfo/*.ics` files touched, StAX factories for XML |
+
+Merged into `src/main/resources/META-INF/native-image/org.ical4j/ict/reachability-metadata.json`
+(447 reflection entries, 24 resource globs) with test-framework noise dropped and the two
+per-file zoneinfo entries replaced by `zoneinfo/**` and `zoneinfo-global/**`, since any TZID can
+be requested at runtime.
+
+Rebuilt with that file, the native binary passes everything that failed in task 0.1:
+
+| Command | Before | After |
+|---|---|---|
+| `ict list-workspaces`, `ict list --help` | `NoFormatFoundException` from night-config | works (reflect entry for `TomlFormat`) |
+| `ict validate` on a calendar with TZIDs but no VTIMEZONE | untested | works, no alias warning (zoneinfo globs) |
+| `ict convert --format XCAL` / `JCAL` / `JSCALENDAR` | untested | works (StAX service files, Jackson entries) |
+| `ict validate --mode VCARD` | untested | works |
+| `ict --help` | 20–30 ms | 30 ms, 54 MB binary |
+
+Lessons for the real build (design D6, task 5.2):
+- Do not derive metadata from the Spock run. Drive the tracing agent from the native smoke
+  suite's command list on the JVM build instead, so the capture is exactly the surface the
+  binary must support and carries no test-framework noise.
+- Keep a small hand-written base file (`zoneinfo/**`, `zoneinfo-global/**`, `tz.alias`,
+  `TomlFormat` until the code fix lands) and let the agent output merge on top.
+- The AWT dylibs are unchanged (11 files next to the binary); that is a reachability question
+  for `java.beans` via commons-lang3, still open and still not blocking.
+
+Pre-existing JVM failures found while capturing, none native-related:
+- `ict list` and `ict print-workspace` throw `Unable to initialise collection config` on the JVM.
+- `ict convert --format JCARD` on a vCard fails in Jackson with a self-reference cycle through
+  `VCard.entities`, so the vCard JSON path in ical4j-serializer is broken independent of native.
+- `ict filter --filter "summary contains 'Spike'"` rejects that expression; the grammar needs
+  checking before the `filter` verb is admitted.
+
 ## Decision for task 0.4
 
 Proceed with plain GraalVM (design D6). The dependency set is not hostile: the only hard

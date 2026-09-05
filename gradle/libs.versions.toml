@@ -9,7 +9,7 @@ groovy = "3.0.25"
 log4j = "2.25.2"
 spock = "2.4-M7-groovy-3.0"
 junitVintage = "5.14.1"
-picocli = "4.6.3"
+picocli = "4.7.7"
 
 [libraries]
 ical4j = { module = "org.mnode.ical4j:ical4j", version.ref = "ical4j" }
@@ -20,6 +20,7 @@ ical4j-integration-api = { module = "org.ical4j:ical4j-integration-api", version
 ical4j-serializer = { module = "org.ical4j:ical4j-serializer", version.ref = "ical4j-serializer" }
 
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
 
 night-config-toml = { group = "com.electronwill.night-config", name = "toml", version = "3.8.3"}
 

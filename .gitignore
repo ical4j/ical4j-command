@@ -22,3 +22,5 @@ gradle-app.setting
 
 # Claude Code workspace files
 .claude/
+# particulars workspace pointer (machine-specific)
+.dkf

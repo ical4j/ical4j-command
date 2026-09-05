@@ -13,7 +13,7 @@
 - [x] 1.4 Move `ical4j-command-cli` sources to the root module; `settings.gradle` includes nothing; single `build.gradle` with `application`, native plugin (`sharedLibrary = false`, `toolchainDetection = false`), picocli runtime generators from the spike branch, vanniktech coordinates `org.ical4j:ict`
 - [x] 1.5 Remove `module-info.java` files and the bnd/OSGi plugin and annotation processors
 - [x] 1.6 Replace log4j-core and log4j-slf4j2 with slf4j-simple to stderr; delete `log4j2.properties`
-- [ ] 1.7 Quarantine every existing command class under `src/legacy/` (excluded from compilation) so they can be re-admitted one by one; build is green with an empty registry
+- [x] 1.7 Quarantine every existing command class under `src/legacy/` (excluded from compilation) so they can be re-admitted one by one; build is green with an empty registry
 - [ ] 1.8 Write `docs/dropped-commands.md` listing each quarantined command with its intended (verb, type, locus)
 
 ## 2. Operation registry

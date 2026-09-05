@@ -46,6 +46,7 @@ Each operation is a single `Operation` value: `(Verb, EntityType, Locus)`, a par
 - **Why:** in one binary two dispatch paths for the same tuple is duplication with drift risk. The spec's Option B was justified by picocli and Spring AI having incompatible dispatch models; Spring AI is gone.
 - **Consequence:** the `command-vocabulary` spec's "dispatch independently" requirement is removed and the "shared core module" requirement is rewritten.
 - **Alternative rejected:** keep picocli classes as the source of truth and reflect over their annotations to build MCP tools. Reflection is what native image punishes, and picocli's model is CLI-specific.
+- **Vocabulary settled in task 2.1** (from the gaps in `docs/dropped-commands.md`): the type axis is a `Subject` interface implemented by `EntityType`, `SerializationFamily` and `Locus`, so `list collection in workspace` and `import calendar in collection` are ordinary tuples. `Locus` gains `NONE` for stream, file and `generate` operations and `CHANNEL` for `send`/`receive`; neither may be a subject and `OperationId` rejects them. The containment hierarchy is unchanged at two levels.
 
 ### D3 — Handlers return structured results; surfaces render
 Handlers return domain objects (`Calendar`, `VCard`, lists of `Uid`, collection descriptors, plain status records), never formatted strings. The CLI renders to iCalendar/vCard text or a table; MCP renders to text or JSON content blocks. This generalises the existing `AbstractCommand<T>` output-handler idea.

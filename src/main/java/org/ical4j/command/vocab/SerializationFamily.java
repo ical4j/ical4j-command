@@ -37,7 +37,7 @@ package org.ical4j.command.vocab;
  * or writes via {@link Verb#IMPORT} / {@link Verb#EXPORT} when crossing a collection
  * boundary.
  */
-public enum SerializationFamily {
+public enum SerializationFamily implements Subject {
 
     /** iCalendar (RFC 5545) representation. */
     CALENDAR,

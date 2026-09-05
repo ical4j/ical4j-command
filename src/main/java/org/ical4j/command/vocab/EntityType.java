@@ -36,7 +36,7 @@ package org.ical4j.command.vocab;
  * {@link Locus#COLLECTION}. Note that {@code calendar} and {@code card} are NOT entity
  * types - they are {@link SerializationFamily serialization families}.
  */
-public enum EntityType {
+public enum EntityType implements Subject {
 
     EVENT,
     ACTION,

@@ -36,11 +36,30 @@ package org.ical4j.command.vocab;
  * deep: a {@link #WORKSPACE} contains {@link #COLLECTION}s, and a collection directly
  * contains entities. There is no container level between a collection and its entities.
  */
-public enum Locus {
+public enum Locus implements Subject {
 
     /** Top-level container of collections. */
     WORKSPACE,
 
     /** Container of entities; entities live directly here. */
-    COLLECTION
+    COLLECTION,
+
+    /**
+     * Items are transmitted over or accepted from a channel rather than stored: the locus of
+     * {@code send} and {@code receive}. Not a container, so never a subject.
+     */
+    CHANNEL,
+
+    /**
+     * The operation acts on a stream or file, or synthesises output, without touching a store:
+     * {@code generate}, {@code validate} of a file, {@code export} from stdin. Never a subject.
+     */
+    NONE;
+
+    /**
+     * @return whether an operation may name this locus as its subject
+     */
+    public boolean isSubject() {
+        return this == WORKSPACE || this == COLLECTION;
+    }
 }

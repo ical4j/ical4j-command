@@ -47,7 +47,7 @@ Working natively without any extra metadata: `--version`, `--help` on every subc
 | night-config 3.8.3 (toml) | **breaks** any command touching `CommandConfig`: `NoFormatFoundException: No suitable format for ictrc.toml`. `FormatDetector` locates `TomlFormat` via `Class.forName`, which is invisible to the image | one-line code fix: build `FileConfig` with `TomlFormat.instance()` explicitly, or a reflect entry for `com.electronwill.nightconfig.toml.TomlFormat` |
 | log4j2 2.25.2 | initialises and logs to stderr natively (metadata repository supplies config) | still replace per design D7; it is 2 of the 35 jars and owns stdout/stderr routing |
 | jackson databind + dataformat-xml + woodstox | image builds; not exercised at runtime (`convert` needs a valid input file) | exercise in task 0.2 with the tracing agent; repository has metadata for databind 2.15 and dataformat-xml 2.22 |
-| commons-lang3 3.18.0 | only jar on the classpath referencing `java.desktop` (via `java.beans`), which is why `libawt`, `libfontmanager`, `libfreetype` etc. are copied next to the binary | investigate whether the reference is reachable from our code paths; if not, `-H:-...` or substitution to drop the AWT libs. Not blocking |
+| commons-lang3 3.18.0 | only jar on the classpath referencing `java.desktop` (via `java.beans`); first suspected as the cause of the AWT dylibs | hypothesis disproved in task 0.3, see below: the cause is picocli's reflect-config for `java.net.URL` |
 | `module-info.java` `requires java.desktop` | not the cause of the AWT libs; nothing in this repo uses AWT | remove module-info with the restructure |
 
 ## Pre-existing (not native) issues surfaced
@@ -98,6 +98,58 @@ Pre-existing JVM failures found while capturing, none native-related:
   `VCard.entities`, so the vCard JSON path in ical4j-serializer is broken independent of native.
 - `ict filter --filter "summary contains 'Spike'"` rejects that expression; the grammar needs
   checking before the `filter` verb is admitted.
+
+## Task 0.3: per-dependency cost, measured
+
+To separate what each dependency really needs from what the agent happened to record, the
+447-entry merged file was replaced by a hand-written one and the binary rebuilt. Everything
+that failed in 0.1 passes with this, 13 entries in total:
+
+```json
+{
+  "reflection": [
+    { "type": "com.electronwill.nightconfig.toml.TomlFormat" },
+    { "type": "net.fortuna.ical4j.model.TimeZoneRegistryImpl", "methods": [{ "name": "<init>", "parameterTypes": [] }] },
+    { "type": "net.fortuna.ical4j.util.MapTimeZoneCache",       "methods": [{ "name": "<init>", "parameterTypes": [] }] },
+    { "type": "com.fasterxml.jackson.databind.ext.Java7SupportImpl", "methods": [{ "name": "<init>", "parameterTypes": [] }] }
+  ],
+  "resources": [
+    { "glob": "ictrc.default" }, { "glob": "log4j2.properties" }, { "glob": "ical4j.properties" },
+    { "glob": "net/fortuna/ical4j/model/tz.alias" }, { "glob": "tz.alias" },
+    { "glob": "zoneinfo/**" }, { "glob": "zoneinfo-global/**" },
+    { "glob": "net/fortuna/ical4j/transform/compliance/msTimezoneIds" },
+    { "glob": "net/fortuna/ical4j/transform/compliance/msTimezoneNames" }
+  ]
+}
+```
+
+| Dependency | What it actually needs natively | Failure without it | Better fix in the new tree |
+|---|---|---|---|
+| night-config toml | one type entry for `TomlFormat` (`FormatDetector` probes it with `Class.forName`) | `NoFormatFoundException` on any config access | pass `TomlFormat.instance()` to `FileConfig.builder`, then no entry at all |
+| ical4j | constructor entries for `TimeZoneRegistryImpl` and `MapTimeZoneCache` (both instantiated by name from `ical4j.properties` defaults), resource globs for `zoneinfo/**`, `zoneinfo-global/**`, `tz.alias`, `msTimezone*`, `ical4j.properties` | `ClassNotFoundException: TimeZoneRegistryImpl` when a TZID has no in-file VTIMEZONE; alias warnings at startup | contribute the entries upstream to ical4j's bundled `META-INF/native-image` (it already ships `tz.alias`), or keep them in our base file |
+| jackson databind | one constructor entry for `Java7SupportImpl`; everything else comes from the plugin's metadata repository | none observed, entry captured by the agent | keep; it is one line |
+| jackson-dataformat-xml + woodstox | nothing beyond the metadata repository; StAX providers resolve through automatic ServiceLoader support | none | keep as is while `--format XCAL` exists |
+| log4j2 | nothing beyond the metadata repository plus our `log4j2.properties` resource | none | still replace (design D7), for stdout discipline not for native reasons |
+| picocli | generated reflect-config, minus one entry (see below) | commands not instantiable | keep the runtime generators |
+
+### The AWT libraries were picocli's doing
+
+The 11 dylibs (`libawt`, `libfontmanager`, `libfreetype`, `libjsound`, ...) copied next to the
+binary were not caused by commons-lang3. `-H:+PrintAnalysisCallTree` shows two roots:
+
+- `java.net.URL.getContent()` marked as a reflective root method. picocli's generated
+  reflect-config registers every option type with `allPublicMethods`, and `InputOptions` has a
+  `-url` option of type `java.net.URL`. The JDK's `ContentHandler`s for images and audio live in
+  `java.desktop` (`sun.awt.www.content.*`), so `getContent` reaches `Toolkit`,
+  `GraphicsEnvironment` and `javax.sound.sampled.AudioSystem`.
+- Once those classes are in the analysis universe, type-hierarchy analysis adds
+  `sun.awt.SoftCache` behind `Map.clear()` and `EventDispatchThread` behind `Runnable.run()`.
+
+Removing the `java.net.URL` entry from the generated reflect-config (now done in a `doLast` on
+`generatePicocliReflectConfig`) drops every dylib. The binary is a single 51 MB file, `-url`
+still works because picocli converts the string with `new URL(String)` directly, and startup is
+unchanged at 30 ms. For the registry-driven tree the lesson is: parameter types are
+`String`/`Path`/enum, converted in the handler, so no JDK type is ever registered wholesale.
 
 ## Decision for task 0.4
 

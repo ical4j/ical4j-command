@@ -2,7 +2,7 @@
 
 - [x] 0.1 On a throwaway branch add `org.graalvm.buildtools.native` and picocli-codegen to the current `ical4j-command-cli` module
 - [x] 0.2 Run the tracing agent through the 13 Spock specs and a handful of manual `ict` invocations; collect metadata
-- [ ] 0.3 Attempt `nativeCompile`; record every failing dependency (ical4j, jackson, woodstox, log4j, night-config) and the fix or workaround in `docs/native-spike.md`
+- [x] 0.3 Attempt `nativeCompile`; record every failing dependency (ical4j, jackson, woodstox, log4j, night-config) and the fix or workaround in `docs/native-spike.md`
 - [ ] 0.4 Decide from the findings: proceed with plain GraalVM (D6) or switch to Quarkus (D5 fallback); record the decision in `design.md`
 
 ## 1. Collapse the repo

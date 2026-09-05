@@ -18,7 +18,6 @@ gradle-app.setting
 *.iml
 
 # Spring AI weather demo build artifacts
-**/model-context-protocol/**/target/
 
 # Claude Code workspace files
 .claude/

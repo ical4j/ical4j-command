@@ -1,5 +1,0 @@
-dependencies {
-    api project(':ical4j-command-core')
-
-    implementation libs.langchain4j, libs.langchain4j.openai
-}

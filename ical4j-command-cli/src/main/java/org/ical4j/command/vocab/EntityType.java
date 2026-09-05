@@ -29,18 +29,25 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.ical4j.command.core;
+package org.ical4j.command.vocab;
 
 /**
- * The containment hierarchy an operation acts within. The hierarchy is exactly two levels
- * deep: a {@link #WORKSPACE} contains {@link #COLLECTION}s, and a collection directly
- * contains entities. There is no container level between a collection and its entities.
+ * The canonical entity types that operations act on. Every type lives directly within a
+ * {@link Locus#COLLECTION}. Note that {@code calendar} and {@code card} are NOT entity
+ * types - they are {@link SerializationFamily serialization families}.
  */
-public enum Locus {
+public enum EntityType {
 
-    /** Top-level container of collections. */
-    WORKSPACE,
+    EVENT,
+    ACTION,
+    ISSUE,
+    NOTE,
+    OBSERVANCE,
+    AVAILABILITY,
+    REPORT,
 
-    /** Container of entities; entities live directly here. */
-    COLLECTION
+    /** A contact (vCard {@code Entity}). */
+    ENTITY,
+
+    RESOURCE
 }

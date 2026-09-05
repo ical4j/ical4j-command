@@ -1,6 +1,5 @@
 module ical4j.command {
     requires java.base;
-    requires ical4j.command.core;
     requires ical4j.core;
     requires ical4j.vcard;
     requires ical4j.connector.api;
@@ -17,6 +16,7 @@ module ical4j.command {
     requires com.electronwill.nightconfig.core;
 
     exports org.ical4j.command;
+    exports org.ical4j.command.vocab;
     exports org.ical4j.command.calendar;
     exports org.ical4j.command.channel;
     exports org.ical4j.command.collection;

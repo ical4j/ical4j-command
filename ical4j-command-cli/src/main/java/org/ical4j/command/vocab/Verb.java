@@ -29,19 +29,57 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.ical4j.command.core;
+package org.ical4j.command.vocab;
 
 /**
- * The serialization / object families that data is imported from and exported to. These
- * are NOT loci and NOT entity types - they are the representation that an operation reads
- * or writes via {@link Verb#IMPORT} / {@link Verb#EXPORT} when crossing a collection
- * boundary.
+ * The canonical set of action verbs shared by all command surfaces (CLI, MCP, agent).
+ * <p>
+ * Surfaces MUST name operations from this set and MUST NOT introduce synonyms for an
+ * existing verb. Notably {@code create}/{@code add} are standardised on {@link #ADD} and
+ * {@code delete}/{@code remove} on {@link #REMOVE}; the iTIP methods publish/request/reply
+ * are specialised forms of {@link #SEND} (see {@link SendMethod}), not independent verbs.
  */
-public enum SerializationFamily {
+public enum Verb {
 
-    /** iCalendar (RFC 5545) representation. */
-    CALENDAR,
+    /** Return many items of a type within a locus. */
+    LIST,
 
-    /** vCard (RFC 6350) representation. */
-    CARD
+    /** Return one item of a type, addressed by identifier. */
+    GET,
+
+    /** Synthesise a new item from a strategy/template (e.g. an event from a meeting template). */
+    GENERATE,
+
+    /** Place an item into a locus, whether newly made or pre-existing. */
+    ADD,
+
+    /** Modify an existing item in place. */
+    UPDATE,
+
+    /** Take an item out of a locus. */
+    REMOVE,
+
+    /** Duplicate an item into a (possibly different) locus. */
+    COPY,
+
+    /** Relocate an item from one locus to another. */
+    MOVE,
+
+    /** Derive a subset of a type within a locus by expression. */
+    FILTER,
+
+    /** Check an item or locus for conformance. */
+    VALIDATE,
+
+    /** Read a serialization family into a locus. */
+    IMPORT,
+
+    /** Write a serialization family out of a locus. */
+    EXPORT,
+
+    /** Transmit items over a channel (see {@link SendMethod} for iTIP specialisations). */
+    SEND,
+
+    /** Accept incoming items over a channel. */
+    RECEIVE
 }

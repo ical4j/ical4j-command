@@ -29,25 +29,19 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.ical4j.command.core;
+package org.ical4j.command.vocab;
 
 /**
- * The canonical entity types that operations act on. Every type lives directly within a
- * {@link Locus#COLLECTION}. Note that {@code calendar} and {@code card} are NOT entity
- * types - they are {@link SerializationFamily serialization families}.
+ * The serialization / object families that data is imported from and exported to. These
+ * are NOT loci and NOT entity types - they are the representation that an operation reads
+ * or writes via {@link Verb#IMPORT} / {@link Verb#EXPORT} when crossing a collection
+ * boundary.
  */
-public enum EntityType {
+public enum SerializationFamily {
 
-    EVENT,
-    ACTION,
-    ISSUE,
-    NOTE,
-    OBSERVANCE,
-    AVAILABILITY,
-    REPORT,
+    /** iCalendar (RFC 5545) representation. */
+    CALENDAR,
 
-    /** A contact (vCard {@code Entity}). */
-    ENTITY,
-
-    RESOURCE
+    /** vCard (RFC 6350) representation. */
+    CARD
 }

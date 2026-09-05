@@ -29,21 +29,18 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.ical4j.command.core;
+package org.ical4j.command.vocab;
 
 /**
- * iTIP (RFC 5546) methods that specialise a {@link Verb#SEND} operation. These are carried
- * alongside {@code Verb.SEND} rather than being independent verbs: publish/request/reply
- * differ by the method on the transmitted message, not by the action performed.
+ * The containment hierarchy an operation acts within. The hierarchy is exactly two levels
+ * deep: a {@link #WORKSPACE} contains {@link #COLLECTION}s, and a collection directly
+ * contains entities. There is no container level between a collection and its entities.
  */
-public enum SendMethod {
+public enum Locus {
 
-    /** Post calendar data without an expectation of a response. */
-    PUBLISH,
+    /** Top-level container of collections. */
+    WORKSPACE,
 
-    /** Solicit a response (e.g. an invitation to attendees). */
-    REQUEST,
-
-    /** Respond to a prior request (e.g. an attendee's reply). */
-    REPLY
+    /** Container of entities; entities live directly here. */
+    COLLECTION
 }

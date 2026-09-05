@@ -9,7 +9,7 @@
 
 - [x] 1.1 Branch `single-native-binary` from `develop`
 - [x] 1.2 Delete `ical4j-command-mcp`, `ical4j-command-agent`, `model-context-protocol`; remove Spring, Spring AI, langchain4j from `libs.versions.toml`
-- [ ] 1.3 Move `ical4j-command-core` enums into `src/main/java/org/ical4j/command/vocab`; delete the core module
+- [x] 1.3 Move `ical4j-command-core` enums into `src/main/java/org/ical4j/command/vocab`; delete the core module
 - [ ] 1.4 Move `ical4j-command-cli` sources to the root module; `settings.gradle` includes nothing; single `build.gradle` with `application`, native plugin (`sharedLibrary = false`, `toolchainDetection = false`), picocli runtime generators from the spike branch, vanniktech coordinates `org.ical4j:ict`
 - [ ] 1.5 Remove `module-info.java` files and the bnd/OSGi plugin and annotation processors
 - [ ] 1.6 Replace log4j-core and log4j-slf4j2 with slf4j-simple to stderr; delete `log4j2.properties`

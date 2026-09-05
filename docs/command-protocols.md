@@ -5,11 +5,11 @@ This document describes the various command protocols and tools provided by the 
 ## Canonical Vocabulary
 
 All command surfaces (CLI, MCP, agent) name operations from a single controlled vocabulary
-defined in the `ical4j-command-core` module. Each operation is identified by a **verb**, an
+defined in the `org.ical4j.command.vocab` package. Each operation is identified by a **verb**, an
 **entity type**, and a **locus** (container). Surfaces share these names but dispatch
 independently.
 
-- **Verbs** (`org.ical4j.command.core.Verb`): `list` (many), `get` (one), `generate`
+- **Verbs** (`org.ical4j.command.vocab.Verb`): `list` (many), `get` (one), `generate`
   (synthesise from a strategy/template), `add` (place into a locus), `update`, `remove`
   (take out of a locus), `copy`, `move`, `filter`, `validate`, `import`, `export`, `send`,
   `receive`. There is no `create`/`delete` — these are standardised on `add`/`remove`.

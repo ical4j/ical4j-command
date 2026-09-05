@@ -3,14 +3,14 @@
 - [x] 0.1 On a throwaway branch add `org.graalvm.buildtools.native` and picocli-codegen to the current `ical4j-command-cli` module
 - [x] 0.2 Run the tracing agent through the 13 Spock specs and a handful of manual `ict` invocations; collect metadata
 - [x] 0.3 Attempt `nativeCompile`; record every failing dependency (ical4j, jackson, woodstox, log4j, night-config) and the fix or workaround in `docs/native-spike.md`
-- [ ] 0.4 Decide from the findings: proceed with plain GraalVM (D6) or switch to Quarkus (D5 fallback); record the decision in `design.md`
+- [x] 0.4 Decide from the findings: proceed with plain GraalVM (D6) or switch to Quarkus (D5 fallback); record the decision in `design.md`
 
 ## 1. Collapse the repo
 
 - [ ] 1.1 Branch `single-native-binary` from `develop`
 - [ ] 1.2 Delete `ical4j-command-mcp`, `ical4j-command-agent`, `model-context-protocol`; remove Spring, Spring AI, langchain4j from `libs.versions.toml`
 - [ ] 1.3 Move `ical4j-command-core` enums into `src/main/java/org/ical4j/command/vocab`; delete the core module
-- [ ] 1.4 Move `ical4j-command-cli` sources to the root module; `settings.gradle` includes nothing; single `build.gradle` with `application`, native plugin, picocli-codegen, vanniktech coordinates `org.ical4j:ict`
+- [ ] 1.4 Move `ical4j-command-cli` sources to the root module; `settings.gradle` includes nothing; single `build.gradle` with `application`, native plugin (`sharedLibrary = false`, `toolchainDetection = false`), picocli runtime generators from the spike branch, vanniktech coordinates `org.ical4j:ict`
 - [ ] 1.5 Remove `module-info.java` files and the bnd/OSGi plugin and annotation processors
 - [ ] 1.6 Replace log4j-core and log4j-slf4j2 with slf4j-simple to stderr; delete `log4j2.properties`
 - [ ] 1.7 Quarantine every existing command class under `src/legacy/` (excluded from compilation) so they can be re-admitted one by one; build is green with an empty registry
@@ -45,8 +45,8 @@
 
 ## 5. Native build
 
-- [ ] 5.1 Configure `org.graalvm.buildtools.native` and picocli-codegen in the single module; `nativeCompile` produces `ict`
-- [ ] 5.2 Capture and review tracing-agent metadata from the test suite; commit under `META-INF/native-image/org.ical4j/ict/`
+- [ ] 5.1 Configure `org.graalvm.buildtools.native` and the picocli runtime generators (with the `java.net.URL` strip) in the single module; `nativeCompile` produces a single-file `ict` with no dylibs
+- [ ] 5.2 Seed `META-INF/native-image/org.ical4j/ict/reachability-metadata.json` with the 13-entry base file from the spike; drive the tracing agent from the smoke suite's command list on the JVM build, review, and merge on top
 - [ ] 5.3 Native smoke suite: `--help` plus one invocation per registered operation and one `ict mcp` handshake; fails on an operation missing from the suite
 - [ ] 5.4 Verify timezone resources and ServiceLoader factories in the native binary (export with `Australia/Melbourne`, parse `X-` property)
 - [ ] 5.5 Startup measurement script reporting median `ict --help` time, failing over 100 ms

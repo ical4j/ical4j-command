@@ -62,13 +62,21 @@ Handlers return domain objects (`Calendar`, `VCard`, lists of `Uid`, collection 
 Use `io.modelcontextprotocol.sdk:mcp` with `McpServer.sync(...)` and `SyncToolSpecification` built from the registry. Tool names are `<verb>_<type>` (for example `list_event`). No annotation-driven tool discovery.
 
 - **Why:** the SDK tracks the protocol; programmatic registration keeps reflection out; Jackson is already on the classpath through ical4j-serializer.
-- **Alternatives rejected:** Spring AI (Spring Boot runtime, AOT complexity, 100MB+ binaries); Quarkus mcp-server-stdio (absorbs native metadata pain but brings a full framework into a CLI; revisit if the spike in T0 shows metadata is unmanageable); hand-rolled JSON-RPC (protocol drifts).
+- **Alternatives rejected:** Spring AI (Spring Boot runtime, AOT complexity, 100MB+ binaries); Quarkus mcp-server-stdio (absorbs native metadata pain but brings a full framework into a CLI; the T0 spike showed the metadata burden is 13 entries, so the fallback is not needed); hand-rolled JSON-RPC (protocol drifts).
 
-### D6 — GraalVM native via `org.graalvm.buildtools.native` and picocli-codegen
-picocli-codegen generates reflect-config for commands. Remaining metadata (ical4j resources and services, Jackson types, reactor) is captured with the tracing agent during the test run and checked in under `src/main/resources/META-INF/native-image/org.ical4j/ict/`. The JVM `installDist` path stays buildable for debugging and for platforms without a native runner.
+### D6 — GraalVM native via `org.graalvm.buildtools.native`, decided by the T0 spike
+**Decision (task 0.4, 2026-09-05): proceed with plain GraalVM. Quarkus is not needed.** The spike (`docs/native-spike.md`) compiled the current cli module on GraalVM CE 25.3.4 and found the whole dependency set needs 13 hand-written metadata entries: one type for night-config's `TomlFormat`, two constructors for ical4j's timezone registry and cache, one constructor for Jackson, and resource globs for ical4j's zoneinfo trees and alias files. The result is a single 51 MB file with 30 ms startup against 350 ms on the JVM.
 
-- **Why:** standard, supported path; picocli is native-first.
-- **Risk handled in T0:** a spike compiles the current cli module before any restructuring so the dependency cost is known.
+Concrete choices carried forward from the spike:
+- **GraalVM CE for JDK 25 or later.** The plugin's shared reachability-metadata repository refuses GraalVM for JDK 21. Toolchain detection is off; the build reads `GRAALVM_HOME`.
+- **`sharedLibrary = false` set explicitly.** Plugin 1.1.12 passed `--shared` otherwise and produced a dylib.
+- **picocli's runtime generators, not the annotation processor.** picocli-codegen's processor fails on `@ArgGroup` fields in abstract superclasses. `ReflectionConfigGenerator`, `ResourceConfigGenerator` and `DynamicProxyConfigGenerator` build the model the way the app does. For the registry-driven tree they remain the right tool because commands are not annotated classes.
+- **Never register a JDK type wholesale.** picocli registers every option type with all public methods; a `java.net.URL` option made `URL.getContent()` a reflective root, whose JDK content handlers for images and audio live in `java.desktop`, dragging AWT and `javax.sound` into the image and 11 dylibs next to the binary. The generated config strips that entry. Registry parameter types are string, path, integer, boolean and enum, converted inside handlers, so this cannot recur.
+- **Metadata sources.** A small hand-written base file under `src/main/resources/META-INF/native-image/org.ical4j/ict/reachability-metadata.json` holds the 13 entries. The tracing agent is driven from the native smoke suite's command list on the JVM build, not from the Spock run, which drowns the signal in Groovy introspection and test-framework service lookups. Agent output merges on top of the base file and is reviewed before commit.
+- **The JVM `installDist` path stays buildable** for debugging, for the agent run, and for platforms without a native runner.
+
+- **Why:** standard, supported path; picocli is native-first; the measured cost is small.
+- **Alternative rejected:** Quarkus with its picocli and mcp-server-stdio extensions. It would absorb the metadata work, but that work turned out to be 13 lines, and Quarkus adds a build-time framework and a much larger dependency surface to a CLI.
 
 ### D7 — Logging: drop log4j2, everything to stderr
 Replace log4j-core and the slf4j bridge with `slf4j-simple` configured to stderr, level controlled by `--verbose`/`--quiet` and `ICT_LOG_LEVEL`. picocli's out/err are set explicitly per subcommand; `ict mcp` binds picocli's out to stderr.
@@ -97,16 +105,17 @@ src/main/java/org/ical4j/command/
 
 ## Risks / Trade-offs
 
-- [ical4j needs extensive resource and service metadata] → T0 spike quantifies this first; fallback is Quarkus per D5.
-- [Jackson XML via ical4j-serializer drags woodstox and reflective types into the image] → serializer-backed operations (`export --format json|xml`) are the last cohort; drop the XML format if metadata cost is high.
-- [MCP SDK pulls reactor-core, which has its own native quirks] → covered by the tracing agent; SDK is used by Spring AI native builds so metadata exists upstream.
+- [ical4j needs extensive resource and service metadata] → measured in T0: two constructor entries and resource globs; ServiceLoader factories resolve automatically. Contribute the entries upstream to ical4j's bundled `META-INF/native-image`.
+- [Jackson XML via ical4j-serializer drags woodstox and reflective types into the image] → measured in T0: XML and JSON conversion work with one Jackson entry plus the plugin's metadata repository. Keep the formats.
+- [MCP SDK pulls reactor-core, which has its own native quirks] → not exercised by the spike; covered by the tracing agent in task 4/5; SDK is used by Spring AI native builds so metadata exists upstream.
+- [Pre-existing JVM bugs hide behind untested commands] → the spike found `ict list` and `print-workspace` failing to initialise collection config, vCard JSON export cycling in Jackson, and the filter grammar rejecting a basic expression. The admission bar (D8) keeps these out until each has a test.
 - [Native CI matrix is slow and runner-expensive] → run native builds on tags and a nightly schedule only; PR builds run JVM tests plus a single linux native smoke.
 - [Dropping 52 commands loses in-progress ideas] → they stay in git history and are listed in `docs/dropped-commands.md` with their intended vocabulary tuple so they can be re-admitted.
 - [Removing JPMS `module-info` breaks nothing today but the bnd/OSGi packaging goes with it] → accepted; OSGi bundles were never a stated goal of the tool.
 
 ## Migration Plan
 
-1. Branch from `develop`. Run T0 spike on the current `ical4j-command-cli` module; record findings in `docs/native-spike.md`.
+1. Done: T0 spike on the current `ical4j-command-cli` module (branch `spike/native-cli`), findings in `docs/native-spike.md`, decision recorded in D6.
 2. Collapse modules and dependencies (T1). Build stays green with zero operations registered.
 3. Registry, CLI view, first cohort of operations with tests (T2, T3).
 4. `ict mcp` (T4). Verified with a scripted stdio client in tests.

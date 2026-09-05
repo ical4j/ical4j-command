@@ -14,11 +14,11 @@
 - [x] 1.5 Remove `module-info.java` files and the bnd/OSGi plugin and annotation processors
 - [x] 1.6 Replace log4j-core and log4j-slf4j2 with slf4j-simple to stderr; delete `log4j2.properties`
 - [x] 1.7 Quarantine every existing command class under `src/legacy/` (excluded from compilation) so they can be re-admitted one by one; build is green with an empty registry
-- [ ] 1.8 Write `docs/dropped-commands.md` listing each quarantined command with its intended (verb, type, locus)
+- [x] 1.8 Write `docs/dropped-commands.md` listing each quarantined command with its intended (verb, type, locus)
 
 ## 2. Operation registry
 
-- [ ] 2.1 Define `Operation`, `Param`, `ParamType`, `Result` and `Context` in `ops/`
+- [ ] 2.1 Define `Operation`, `Param`, `ParamType`, `Result` and `Context` in `ops/`; settle the vocabulary gaps listed at the end of `docs/dropped-commands.md` (no-locus form, `channel` locus, workspace/collection as listable types)
 - [ ] 2.2 Implement `Registry` with duplicate-tuple rejection and a per-surface exposure flag
 - [ ] 2.3 Implement `Context` construction from `CommandConfig`: active workspace, calendar store, card store
 - [ ] 2.4 Registry conformance test: every registered tuple has a Spock spec referencing it

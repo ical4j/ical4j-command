@@ -1,11 +1,7 @@
 package org.ical4j.command;
 
 import net.fortuna.ical4j.util.CompatibilityHints;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.config.Configurator;
 import picocli.CommandLine;
-
-import static org.apache.logging.log4j.Level.*;
 
 public class GlobalOptions {
 
@@ -15,10 +11,13 @@ public class GlobalOptions {
         CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_UNFOLDING, true);
     }
 
+    /**
+     * Declared so that the flag appears in usage help and is accepted by the parser. The level
+     * itself is applied earlier, from the raw arguments, by {@link LogLevel#configure(String[])}.
+     */
     @CommandLine.Option(names = {"-v", "--verbose"}, scope = CommandLine.ScopeType.INHERIT,
-            description = "Increase logging verbosity")
+            description = "Increase logging verbosity (-v info, -vv debug, -vvv trace)")
     public void setVerbose(boolean[] verbose) {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(),
-                verbose.length > 2 ? TRACE : verbose.length > 1 ? DEBUG : INFO);
+        // handled by LogLevel before parsing
     }
 }

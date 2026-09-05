@@ -12,7 +12,7 @@
 - [x] 1.3 Move `ical4j-command-core` enums into `src/main/java/org/ical4j/command/vocab`; delete the core module
 - [x] 1.4 Move `ical4j-command-cli` sources to the root module; `settings.gradle` includes nothing; single `build.gradle` with `application`, native plugin (`sharedLibrary = false`, `toolchainDetection = false`), picocli runtime generators from the spike branch, vanniktech coordinates `org.ical4j:ict`
 - [x] 1.5 Remove `module-info.java` files and the bnd/OSGi plugin and annotation processors
-- [ ] 1.6 Replace log4j-core and log4j-slf4j2 with slf4j-simple to stderr; delete `log4j2.properties`
+- [x] 1.6 Replace log4j-core and log4j-slf4j2 with slf4j-simple to stderr; delete `log4j2.properties`
 - [ ] 1.7 Quarantine every existing command class under `src/legacy/` (excluded from compilation) so they can be re-admitted one by one; build is green with an empty registry
 - [ ] 1.8 Write `docs/dropped-commands.md` listing each quarantined command with its intended (verb, type, locus)
 
@@ -46,7 +46,7 @@
 ## 5. Native build
 
 - [ ] 5.1 Configure `org.graalvm.buildtools.native` and the picocli runtime generators (with the `java.net.URL` strip) in the single module; `nativeCompile` produces a single-file `ict` with no dylibs
-- [ ] 5.2 Seed `META-INF/native-image/org.ical4j/ict/reachability-metadata.json` with the 13-entry base file from the spike; drive the tracing agent from the smoke suite's command list on the JVM build, review, and merge on top
+- [ ] 5.2 Seed `META-INF/native-image/org.ical4j/ict/reachability-metadata.json` with the 13-entry base file from the spike (`simplelogger.properties` replaces the `log4j2.properties` glob); drive the tracing agent from the smoke suite's command list on the JVM build, review, and merge on top
 - [ ] 5.3 Native smoke suite: `--help` plus one invocation per registered operation and one `ict mcp` handshake; fails on an operation missing from the suite
 - [ ] 5.4 Verify timezone resources and ServiceLoader factories in the native binary (export with `Australia/Melbourne`, parse `X-` property)
 - [ ] 5.5 Startup measurement script reporting median `ict --help` time, failing over 100 ms

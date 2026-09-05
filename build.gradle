@@ -66,7 +66,11 @@ dependencies {
 
     implementation libs.picocli, libs.night.config.toml
 
-    implementation libs.log4j.core, libs.log4j.slf4j2
+    // Logging: slf4j-simple to stderr only. stdout is reserved for command output and,
+    // under `ict mcp`, for the protocol stream. Level is chosen in CommandMain before any
+    // logger is created (see LogLevel).
+    implementation libs.slf4j.api
+    runtimeOnly libs.slf4j.simple
 
     testImplementation platform(libs.spock.bom), libs.spock.core
     testRuntimeOnly libs.junit.platform

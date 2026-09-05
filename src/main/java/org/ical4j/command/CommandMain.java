@@ -42,6 +42,7 @@ import picocli.CommandLine;
 public class CommandMain extends GlobalOptions {
 
     public static void main(String[] args) {
+        LogLevel.configure(args);
         int exitCode = new CommandLine(new CommandMain()).execute(args);
         System.exit(exitCode);
     }

@@ -16,26 +16,27 @@ Conventions:
   removed one stored object by identifier, so they become `remove <type> --uid`, not a
   `calendar`-family operation.
 - **Cohort 1** is the set covered by the 13 Spock specs that were green at quarantine time.
-  Those specs moved with their classes and are the admission tickets (design D8).
+  Rows marked *1 (done)* were re-admitted in task 2.5 with new specs against local stores on a
+  temp directory; their legacy classes and mock-based specs were then deleted from `src/legacy`.
 - **Not an operation** marks picocli group nodes that only held subcommands; the verb-first
   tree replaces them.
 
 | Legacy class | Old invocation | Tuple (verb, type, locus) | Cohort | Notes |
 |---|---|---|---|---|
-| `collection.AddCollection` | `mkcol <name> --type` | (`add`, `collection`, `workspace`) | 1 | spec: `AddCollectionTest` |
-| `collection.RemoveCollection` | `rmcol <name>` | (`remove`, `collection`, `workspace`) | 1 | spec: `RemoveCollectionTest` |
-| `collection.GetCollectionDetails` | `get-collection-details <name>` | (`get`, `collection`, `workspace`) | 1 | spec: `GetCollectionDetailsTest` |
-| `ListCommand` | `list [spec]` | (`list`, `<type>`, `collection`) | 1 | spec: `ListCommandTest`. Type comes from the `spec` argument today; one registry entry per entity type |
+| `collection.AddCollection` | `mkcol <name> --type` | (`add`, `collection`, `workspace`) | 1 (done) | admitted: `CollectionOperations.add`, spec `CollectionOperationsTest` |
+| `collection.RemoveCollection` | `rmcol <name>` | (`remove`, `collection`, `workspace`) | 1 (done) | admitted: `CollectionOperations.remove`, spec `CollectionOperationsTest` |
+| `collection.GetCollectionDetails` | `get-collection-details <name>` | (`get`, `collection`, `workspace`) | 1 (done) | admitted: `CollectionOperations.get`, spec `CollectionOperationsTest` |
+| `ListCommand` | `list [spec]` | (`list`, `<type>`, `collection`) | 1 (done) | admitted as `list collection in workspace` (`CollectionOperations.list`) and `list event|action|note|entity in collection` (`ListOperations`), specs `CollectionOperationsTest`, `ListOperationsTest`. The old `--filter` is deferred to the `filter` verb |
 | `collection.ListObjectUids` | `list-uids` | (`list`, `<type>`, `collection`) | later | subsumed by `list` with a `--uids-only` output choice |
 | `collection.ListCards` | `list-cards` | (`list`, `entity`, `collection`) | later | subsumed by `list entity` |
 | `collection.UpdateCollection` | `update-collection` | (`update`, `collection`, `workspace`) | later | |
 | `collection.CollectionCommandGroup` | `collections ...` | not an operation | | group node |
-| `calendar.UpdateCalendar` | `import-calendar` | (`import`, `calendar`, `collection`) | 1 | spec: `UpdateCalendarTest` |
-| `calendar.GetCalendar` | `export-calendar` | (`export`, `calendar`, `collection`) | 1 | spec: `GetCalendarTest` |
-| `calendar.DeleteCalendar` | `remove-calendar <uid>` | (`remove`, `<type>`, `collection`) | 1 | spec: `DeleteCalendarTest`. Removes one stored object by UID |
-| `card.UpdateCard` | `import-card` | (`import`, `card`, `collection`) | 1 | spec: `UpdateCardTest` |
-| `card.GetCard` | `export-card` | (`export`, `card`, `collection`) | 1 | spec: `GetCardTest` |
-| `card.DeleteCard` | `remove-card <uid>` | (`remove`, `entity`, `collection`) | 1 | spec: `DeleteCardTest` |
+| `calendar.UpdateCalendar` | `import-calendar` | (`import`, `calendar`, `collection`) | 1 (done) | admitted: `CalendarOperations.importCalendar`, spec `CalendarOperationsTest` |
+| `calendar.GetCalendar` | `export-calendar` | (`export`, `calendar`, `collection`) | 1 (done) | admitted: `CalendarOperations.exportCalendar`, spec `CalendarOperationsTest` |
+| `calendar.DeleteCalendar` | `remove-calendar <uid>` | (`remove`, `<type>`, `collection`) | 1 (done) | admitted as (`remove`, `calendar`, `collection`): `CalendarOperations.removeCalendar`, spec `CalendarOperationsTest` |
+| `card.UpdateCard` | `import-card` | (`import`, `card`, `collection`) | 1 (done) | admitted: `CardOperations.importCard`, spec `CardOperationsTest` |
+| `card.GetCard` | `export-card` | (`export`, `card`, `collection`) | 1 (done) | admitted: `CardOperations.exportCard`, spec `CardOperationsTest` |
+| `card.DeleteCard` | `remove-card <uid>` | (`remove`, `entity`, `collection`) | 1 (done) | admitted: `CardOperations.removeCard`, spec `CardOperationsTest` |
 | `ImportCalendars` | `import` | (`import`, `calendar`, `collection`) | later | duplicate of `import-calendar` with a different input path; merge |
 | `ImportCards` | `import-cards` | (`import`, `card`, `collection`) | later | duplicate of `import-card`; merge |
 | `ExportCommand` | `export` | (`export`, `calendar`\|`card`, `collection`) | later | family chosen by collection type |

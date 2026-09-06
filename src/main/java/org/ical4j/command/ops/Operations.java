@@ -13,7 +13,10 @@ public final class Operations {
 
     public static Registry standard() {
         return Registry.builder()
-                // First cohort (task 2.5) registers here.
+                .addAll(CollectionOperations.all())
+                .addAll(CalendarOperations.all())
+                .addAll(CardOperations.all())
+                .addAll(ListOperations.all())
                 .build();
     }
 }

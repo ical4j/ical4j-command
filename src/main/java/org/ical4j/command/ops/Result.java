@@ -3,6 +3,8 @@ package org.ical4j.command.ops;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.vcard.VCard;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,10 +25,15 @@ public interface Result {
         }
     }
 
-    /** A described item or locus: ordered name/value attributes. */
+    /** A described item or locus: name/value attributes in insertion order. */
     record Descriptor(Map<String, String> attributes) implements Result {
         public Descriptor {
-            attributes = Map.copyOf(attributes);
+            attributes.forEach((k, v) -> {
+                if (k == null || v == null) {
+                    throw new NullPointerException("Descriptor attributes cannot be null: " + k);
+                }
+            });
+            attributes = Collections.unmodifiableMap(new LinkedHashMap<>(attributes));
         }
     }
 
@@ -45,8 +52,12 @@ public interface Result {
     record CardData(VCard card) implements Result {
     }
 
-    /** A validation outcome: empty entries mean valid. */
-    record Validation(List<String> entries) implements Result {
+    /** One validation finding. */
+    record ValidationEntry(String severity, String context, String message) {
+    }
+
+    /** A validation outcome: no entries means valid. */
+    record Validation(List<ValidationEntry> entries) implements Result {
         public Validation {
             entries = List.copyOf(entries);
         }

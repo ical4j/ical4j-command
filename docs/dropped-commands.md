@@ -90,7 +90,7 @@ Conventions:
 | `card.CardCommandGroup` | `card ...` | not an operation | | group node |
 
 Support classes quarantined alongside, with no tuple of their own: `AbstractCommand`,
-`DefaultOutputHandlers` (ported as renderers in task 2.6), `InputHandler`, `InputOptions`,
+`DefaultOutputHandlers` (ported to `ops.Renderer` in task 2.6 and deleted), `InputHandler`, `InputOptions`,
 `OutputOptions`, `calendar.AbstractCalendarCommand`, `card.AbstractEntityCommand`,
 `channel.AbstractEgressChannelCommand`, `channel.AbstractIngressChannelCommand`,
 `collection.AbstractCollectionCommand`, `workspace.AbstractWorkspaceCommand`.

@@ -23,7 +23,7 @@
 - [x] 2.3 Implement `Context` construction from `CommandConfig`: active workspace, calendar store, card store
 - [x] 2.4 Registry conformance test: every registered tuple has a Spock spec referencing it
 - [x] 2.5 Port first cohort handlers with their existing specs: add/get/remove collection, list collections, import/export/remove calendar, import/export/remove card, list in collection
-- [ ] 2.6 Port `DefaultOutputHandlers` logic into surface-neutral renderers (`text`, `json`, `ical`, `vcard`)
+- [x] 2.6 Port `DefaultOutputHandlers` logic into surface-neutral renderers (`text`, `json`, `ical`, `vcard`)
 
 ## 3. CLI surface
 

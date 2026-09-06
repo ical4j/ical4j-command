@@ -21,7 +21,7 @@
 - [x] 2.1 Define `Operation`, `Param`, `ParamType`, `Result` and `Context` in `ops/`; settle the vocabulary gaps listed at the end of `docs/dropped-commands.md` (no-locus form, `channel` locus, workspace/collection as listable types)
 - [x] 2.2 Implement `Registry` with duplicate-tuple rejection and a per-surface exposure flag
 - [x] 2.3 Implement `Context` construction from `CommandConfig`: active workspace, calendar store, card store
-- [ ] 2.4 Registry conformance test: every registered tuple has a Spock spec referencing it
+- [x] 2.4 Registry conformance test: every registered tuple has a Spock spec referencing it
 - [ ] 2.5 Port first cohort handlers with their existing specs: add/get/remove collection, list collections, import/export/remove calendar, import/export/remove card, list in collection
 - [ ] 2.6 Port `DefaultOutputHandlers` logic into surface-neutral renderers (`text`, `json`, `ical`, `vcard`)
 

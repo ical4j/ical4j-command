@@ -22,6 +22,31 @@ class OperationTest extends Specification {
         Verb.LIST     | Locus.WORKSPACE             | Locus.NONE       | 'list workspace'
     }
 
+    def 'identities parse from their text form'() {
+        expect:
+        OperationId.parse(text) == OperationId.of(verb, subject, locus)
+
+        where:
+        text                            | verb          | subject                      | locus
+        'list event in collection'      | Verb.LIST     | EntityType.EVENT             | Locus.COLLECTION
+        'add collection in workspace'   | Verb.ADD      | Locus.COLLECTION             | Locus.WORKSPACE
+        'import calendar in collection' | Verb.IMPORT   | SerializationFamily.CALENDAR | Locus.COLLECTION
+        'generate event'                | Verb.GENERATE | EntityType.EVENT             | Locus.NONE
+        '  list   workspace '           | Verb.LIST     | Locus.WORKSPACE              | Locus.NONE
+    }
+
+    def 'parsing rejects words outside the vocabulary'() {
+        when:
+        OperationId.parse(text)
+
+        then:
+        thrown(IllegalArgumentException)
+
+        where:
+        text << ['fetch event in collection', 'list widget in collection', 'list event in nowhere',
+                 'list event at collection', 'list', 'list none', 'list channel']
+    }
+
     def 'a non-container locus cannot be a subject'() {
         when:
         OperationId.of(Verb.LIST, subject, Locus.NONE)

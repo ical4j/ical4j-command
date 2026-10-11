@@ -45,11 +45,11 @@
 
 ## 5. Native build
 
-- [ ] 5.1 Configure `org.graalvm.buildtools.native` and the picocli runtime generators (with the `java.net.URL` strip) in the single module; `nativeCompile` produces a single-file `ict` with no dylibs
-- [ ] 5.2 Seed `META-INF/native-image/org.ical4j/ict/reachability-metadata.json` with the 13-entry base file from the spike (`simplelogger.properties` replaces the `log4j2.properties` glob); drive the tracing agent from the smoke suite's command list on the JVM build, review, and merge on top
-- [ ] 5.3 Native smoke suite: `--help` plus one invocation per registered operation and one `ict mcp` handshake; fails on an operation missing from the suite
-- [ ] 5.4 Verify timezone resources and ServiceLoader factories in the native binary (export with `Australia/Melbourne`, parse `X-` property)
-- [ ] 5.5 Startup measurement script reporting median `ict --help` time, failing over 100 ms
+- [x] 5.1 Configure `org.graalvm.buildtools.native` and the picocli runtime generators (with the `java.net.URL` strip) in the single module; `nativeCompile` produces a single-file `ict` with no dylibs
+- [x] 5.2 Seed `META-INF/native-image/org.ical4j/ict/reachability-metadata.json` with the 13-entry base file from the spike (`simplelogger.properties` replaces the `log4j2.properties` glob); drive the tracing agent from the smoke suite's command list on the JVM build, review, and merge on top
+- [x] 5.3 Native smoke suite: `--help` plus one invocation per registered operation and one `ict mcp` handshake; fails on an operation missing from the suite
+- [x] 5.4 Verify timezone resources and ServiceLoader factories in the native binary (export with `Australia/Melbourne`, parse `X-` property)
+- [x] 5.5 Startup measurement script reporting median `ict --help` time, failing over 100 ms
 
 ## 6. CI and distribution
 

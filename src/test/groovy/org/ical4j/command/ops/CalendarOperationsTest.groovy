@@ -91,6 +91,34 @@ class CalendarOperationsTest extends Specification {
         thrown(OperationException.NotFound)
     }
 
+    def "'export calendar in collection' adds a VTIMEZONE for each referenced TZID that lacks one"() {
+        given:
+        def ics = event('tz@ict', 'Melbourne').replace('DTSTART:20260910T100000Z', 'DTSTART;TZID=Australia/Melbourne:20260910T100000')
+        op('import calendar in collection').execute(ctx, Params.of(collection: 'events', file: write(dir, 'tz.ics', ics).toString()))
+
+        when:
+        def calendar = (op('export calendar in collection').execute(ctx, Params.of(collection: 'events', uid: 'tz@ict')) as Result.CalendarData).calendar()
+        def zones = calendar.getComponents('VTIMEZONE')
+
+        then:
+        zones*.getProperty('TZID')*.get()*.value == ['Australia/Melbourne']
+
+        and: 'a calendar that already carries its zones is unchanged'
+        CalendarOperations.withTimeZones(calendar).is(calendar)
+    }
+
+    def "'import calendar in collection' accepts several objects that reference a TZID with no VTIMEZONE"() {
+        given: 'the connector alone fails on this input with a NullPointerException'
+        def ics = event('tz@ict', 'Melbourne').replace('DTSTART:20260910T100000Z', 'DTSTART;TZID=Australia/Melbourne:20260910T100000')
+                .replace('END:VCALENDAR', todo('t@ict', 'Todo').readLines()[3..-2].join('\n') + '\nEND:VCALENDAR')
+
+        when:
+        def result = op('import calendar in collection').execute(ctx, Params.of(collection: 'events', file: write(dir, 'two.ics', ics).toString()))
+
+        then:
+        (result as Result.Identifiers).ids() as Set == ['tz@ict', 't@ict'] as Set
+    }
+
     def "'remove calendar in collection' removes one object by UID"() {
         given:
         op('import calendar in collection').execute(ctx, Params.of(collection: 'events', file: write(dir, 'a.ics', event('a@ict', 'First')).toString()))

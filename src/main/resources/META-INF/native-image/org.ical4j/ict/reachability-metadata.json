@@ -1,0 +1,950 @@
+{
+    "reflection": [
+        {
+            "type": "com.ctc.wstx.stax.WstxInputFactory"
+        },
+        {
+            "type": "com.ctc.wstx.stax.WstxOutputFactory"
+        },
+        {
+            "type": "com.ethlo.time.ITU"
+        },
+        {
+            "type": "com.fasterxml.jackson.databind.deser.BeanDeserializerModifier[]"
+        },
+        {
+            "type": "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "com.fasterxml.jackson.databind.ser.BeanSerializerModifier[]"
+        },
+        {
+            "type": "com.fasterxml.jackson.databind.ser.Serializers[]"
+        },
+        {
+            "type": "io.modelcontextprotocol.json.schema.jackson2.JacksonJsonSchemaValidatorSupplier"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Annotated"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Annotations"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$CallToolRequest",
+            "methods": [
+                {
+                    "name": "fromJson",
+                    "parameterTypes": [
+                        "java.lang.String",
+                        "java.util.Map",
+                        "java.util.Map"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$CallToolResult",
+            "methods": [
+                {
+                    "name": "content",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "isError",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "meta",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "structuredContent",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "parameterTypes": [
+                        "java.util.Map",
+                        "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities$RootCapabilities",
+                        "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities$Sampling",
+                        "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities$Elicitation"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities$Elicitation"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities$Elicitation$Form"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities$Elicitation$Url"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities$RootCapabilities"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities$Sampling"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Content"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Icon"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Identifier"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Implementation",
+            "methods": [
+                {
+                    "name": "description",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "fromJson",
+                    "parameterTypes": [
+                        "java.lang.String",
+                        "java.lang.String",
+                        "java.lang.String",
+                        "java.lang.String",
+                        "java.util.List",
+                        "java.lang.String"
+                    ]
+                },
+                {
+                    "name": "icons",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "name",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "title",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "version",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "websiteUrl",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$InitializeRequest",
+            "methods": [
+                {
+                    "name": "fromJson",
+                    "parameterTypes": [
+                        "java.lang.String",
+                        "io.modelcontextprotocol.spec.McpSchema$ClientCapabilities",
+                        "io.modelcontextprotocol.spec.McpSchema$Implementation",
+                        "java.util.Map"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$InitializeResult",
+            "methods": [
+                {
+                    "name": "capabilities",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "instructions",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "meta",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "protocolVersion",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "serverInfo",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$JSONRPCMessage"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$JSONRPCNotification",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "parameterTypes": [
+                        "java.lang.String",
+                        "java.lang.String",
+                        "java.lang.Object"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$JSONRPCRequest",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "parameterTypes": [
+                        "java.lang.String",
+                        "java.lang.String",
+                        "java.lang.Object",
+                        "java.lang.Object"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$JSONRPCResponse",
+            "methods": [
+                {
+                    "name": "error",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "id",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "jsonrpc",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "result",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$JSONRPCResponse$JSONRPCError"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ListToolsResult",
+            "methods": [
+                {
+                    "name": "meta",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "nextCursor",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "tools",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Meta"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Request"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Result"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ServerCapabilities",
+            "methods": [
+                {
+                    "name": "completions",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "experimental",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "logging",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "prompts",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "resources",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "tools",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ServerCapabilities$CompletionCapabilities"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ServerCapabilities$LoggingCapabilities"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ServerCapabilities$PromptCapabilities"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ServerCapabilities$ResourceCapabilities"
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ServerCapabilities$ToolCapabilities",
+            "methods": [
+                {
+                    "name": "listChanged",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$TextContent",
+            "methods": [
+                {
+                    "name": "annotations",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "meta",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "text",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Tool",
+            "methods": [
+                {
+                    "name": "annotations",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "description",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "icons",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "inputSchema",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "meta",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "name",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "outputSchema",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "title",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$ToolAnnotations",
+            "methods": [
+                {
+                    "name": "destructiveHint",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "idempotentHint",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "openWorldHint",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "readOnlyHint",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "returnDirect",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "title",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "io.modelcontextprotocol.spec.McpSchema$Tool[]"
+        },
+        {
+            "type": "java.io.Serializable"
+        },
+        {
+            "type": "java.lang.Boolean",
+            "jniAccessible": true,
+            "methods": [
+                {
+                    "name": "getBoolean",
+                    "parameterTypes": [
+                        "java.lang.String"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "java.lang.Class",
+            "methods": [
+                {
+                    "name": "getRecordComponents",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "isRecord",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "java.lang.Comparable"
+        },
+        {
+            "type": "java.lang.Double"
+        },
+        {
+            "type": "java.lang.Iterable"
+        },
+        {
+            "type": "java.lang.Number"
+        },
+        {
+            "type": "java.lang.Object"
+        },
+        {
+            "type": "java.lang.Object[]"
+        },
+        {
+            "type": "java.lang.Record"
+        },
+        {
+            "type": "java.lang.System",
+            "methods": [
+                {
+                    "name": "console",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "java.lang.constant.Constable"
+        },
+        {
+            "type": "java.lang.constant.ConstantDesc"
+        },
+        {
+            "type": "java.lang.reflect.RecordComponent",
+            "methods": [
+                {
+                    "name": "getName",
+                    "parameterTypes": [
+                        
+                    ]
+                },
+                {
+                    "name": "getType",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "java.nio.file.Path"
+        },
+        {
+            "type": "java.nio.file.Paths"
+        },
+        {
+            "type": "java.time.Duration"
+        },
+        {
+            "type": "java.time.Instant"
+        },
+        {
+            "type": "java.time.LocalDate"
+        },
+        {
+            "type": "java.time.LocalDateTime"
+        },
+        {
+            "type": "java.time.LocalTime"
+        },
+        {
+            "type": "java.time.MonthDay"
+        },
+        {
+            "type": "java.time.OffsetDateTime"
+        },
+        {
+            "type": "java.time.OffsetTime"
+        },
+        {
+            "type": "java.time.Period"
+        },
+        {
+            "type": "java.time.Year"
+        },
+        {
+            "type": "java.time.YearMonth"
+        },
+        {
+            "type": "java.time.ZoneId"
+        },
+        {
+            "type": "java.time.ZoneOffset"
+        },
+        {
+            "type": "java.time.ZonedDateTime"
+        },
+        {
+            "type": "java.util.AbstractCollection"
+        },
+        {
+            "type": "java.util.Collection"
+        },
+        {
+            "type": "java.util.ImmutableCollections$AbstractImmutableCollection"
+        },
+        {
+            "type": "java.util.ImmutableCollections$AbstractImmutableList"
+        },
+        {
+            "type": "java.util.ImmutableCollections$List12"
+        },
+        {
+            "type": "java.util.ImmutableCollections$ListN"
+        },
+        {
+            "type": "java.util.List"
+        },
+        {
+            "type": "java.util.RandomAccess"
+        },
+        {
+            "type": "net.fortuna.ical4j.extensions.validate.ExtensionsCalendarValidatorFactory"
+        },
+        {
+            "type": "net.fortuna.ical4j.model.DefaultZoneRulesProvider"
+        },
+        {
+            "type": "net.fortuna.ical4j.model.TimeZoneRegistryImpl",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "net.fortuna.ical4j.model.TimeZoneRegistryImpl"
+        },
+        {
+            "type": "net.fortuna.ical4j.util.MapTimeZoneCache",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "org.ical4j.command.cli.GlobalOptions",
+            "methods": [
+                {
+                    "name": "setFormat",
+                    "parameterTypes": [
+                        "org.ical4j.command.ops.Format"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "org.ical4j.command.cli.Main"
+        },
+        {
+            "type": "org.ical4j.command.cli.VersionProvider",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "org.slf4j.simple.SimpleServiceProvider"
+        },
+        {
+            "type": "picocli.CommandLine$AutoHelpMixin",
+            "fields": [
+                {
+                    "name": "helpRequested"
+                },
+                {
+                    "name": "versionRequested"
+                }
+            ]
+        },
+        {
+            "type": "reactor.core.publisher.FlatMapTracker"
+        },
+        {
+            "type": "reactor.core.publisher.FluxFlatMap$FlatMapInner"
+        },
+        {
+            "type": "reactor.core.publisher.FluxFlatMap$FlatMapMain"
+        },
+        {
+            "type": "reactor.core.publisher.FluxIterable$IterableSubscription"
+        },
+        {
+            "type": "reactor.core.publisher.FluxOnErrorReturn$ReturnSubscriber"
+        },
+        {
+            "type": "reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber"
+        },
+        {
+            "type": "reactor.core.publisher.FluxReplay"
+        },
+        {
+            "type": "reactor.core.publisher.FluxSubscribeOnCallable$CallableSubscribeOnSubscription"
+        },
+        {
+            "type": "reactor.core.publisher.LambdaMonoSubscriber"
+        },
+        {
+            "type": "reactor.core.publisher.LambdaSubscriber"
+        },
+        {
+            "type": "reactor.core.publisher.MonoFlatMap$FlatMapMain"
+        },
+        {
+            "type": "reactor.core.publisher.MonoIgnoreThen$ThenIgnoreMain"
+        },
+        {
+            "type": "reactor.core.publisher.MonoZip$ZipCoordinator"
+        },
+        {
+            "type": "reactor.core.publisher.MonoZip$ZipInner"
+        },
+        {
+            "type": "reactor.core.publisher.Operators$BaseFluxToMonoOperator"
+        },
+        {
+            "type": "reactor.core.publisher.Operators$MonoInnerProducerBase"
+        },
+        {
+            "type": "reactor.core.publisher.Operators$MultiSubscriptionSubscriber"
+        },
+        {
+            "type": "reactor.core.publisher.Operators$ScalarSubscription"
+        },
+        {
+            "type": "reactor.core.publisher.SinkEmptyMulticast"
+        },
+        {
+            "type": "reactor.core.publisher.SinkManyUnicast"
+        },
+        {
+            "type": "reactor.core.publisher.SinksSpecs$AbstractSerializedSink"
+        },
+        {
+            "type": "reactor.core.scheduler.BoundedElasticScheduler"
+        },
+        {
+            "type": "reactor.core.scheduler.BoundedElasticScheduler$BoundedServices"
+        },
+        {
+            "type": "reactor.core.scheduler.BoundedElasticScheduler$BoundedState"
+        },
+        {
+            "type": "reactor.core.scheduler.DelegateServiceScheduler"
+        },
+        {
+            "type": "reactor.core.scheduler.SchedulerTask"
+        },
+        {
+            "type": "reactor.core.scheduler.WorkerTask"
+        },
+        {
+            "type": "reactor.util.concurrent.SpscArrayQueueConsumer"
+        },
+        {
+            "type": "reactor.util.concurrent.SpscArrayQueueProducer"
+        },
+        {
+            "type": "reactor.util.concurrent.SpscLinkedArrayQueue"
+        },
+        {
+            "type": "sun.security.provider.NativePRNG",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "parameterTypes": [
+                        "java.security.SecureRandomParameters"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "sun.security.provider.SHA",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "parameterTypes": [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "sun.text.resources.BreakIteratorInfo"
+        },
+        {
+            "type": "sun.text.resources.BreakIteratorResources"
+        },
+        {
+            "type": "sun.text.resources.BreakIteratorResources_en"
+        },
+        {
+            "type": "sun.text.resources.cldr.FormatData"
+        },
+        {
+            "type": "sun.text.resources.cldr.FormatData_en"
+        },
+        {
+            "type": "sun.text.resources.cldr.FormatData_en_US"
+        },
+        {
+            "type": "sun.util.resources.cldr.CalendarData"
+        },
+        {
+            "type": "sun.util.resources.cldr.TimeZoneNames"
+        },
+        {
+            "type": "sun.util.resources.cldr.TimeZoneNames_en"
+        },
+        {
+            "type": "sun.util.resources.cldr.TimeZoneNames_en_US"
+        }
+    ],
+    "resources": [
+        {
+            "glob": "META-INF/services/io.modelcontextprotocol.json.schema.JsonSchemaValidatorSupplier"
+        },
+        {
+            "glob": "META-INF/services/java.time.zone.ZoneRulesProvider"
+        },
+        {
+            "glob": "META-INF/services/javax.xml.stream.XMLInputFactory"
+        },
+        {
+            "glob": "META-INF/services/javax.xml.stream.XMLOutputFactory"
+        },
+        {
+            "glob": "META-INF/services/net.fortuna.ical4j.validate.CalendarValidatorFactory"
+        },
+        {
+            "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
+        },
+        {
+            "glob": "draft/2020-12/meta/applicator"
+        },
+        {
+            "glob": "draft/2020-12/meta/content"
+        },
+        {
+            "glob": "draft/2020-12/meta/core"
+        },
+        {
+            "glob": "draft/2020-12/meta/format-annotation"
+        },
+        {
+            "glob": "draft/2020-12/meta/meta-data"
+        },
+        {
+            "glob": "draft/2020-12/meta/unevaluated"
+        },
+        {
+            "glob": "draft/2020-12/meta/validation"
+        },
+        {
+            "glob": "draft/2020-12/schema"
+        },
+        {
+            "glob": "ical4j.properties"
+        },
+        {
+            "glob": "ictrc.default.toml"
+        },
+        {
+            "glob": "net/fortuna/ical4j/model/tz.alias"
+        },
+        {
+            "glob": "net/fortuna/ical4j/transform/compliance/msTimezoneIds"
+        },
+        {
+            "glob": "net/fortuna/ical4j/transform/compliance/msTimezoneNames"
+        },
+        {
+            "glob": "org/ical4j/command/version.properties"
+        },
+        {
+            "glob": "simplelogger.properties"
+        },
+        {
+            "glob": "tz.alias"
+        },
+        {
+            "glob": "zoneinfo-global/**"
+        },
+        {
+            "glob": "zoneinfo/**"
+        },
+        {
+            "module": "java.base",
+            "glob": "sun/text/resources/LineBreakIteratorData"
+        }
+    ]
+}

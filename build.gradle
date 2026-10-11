@@ -171,6 +171,9 @@ graalvmNative {
             // native-gradle-plugin 1.1.12 passes --shared with this config unless set explicitly.
             sharedLibrary = false
             buildArgs.add('-H:+ReportExceptionStackTraces')
+            // native-image runs its C toolchain with a clean environment. Pass SDKROOT through so
+            // a macOS SDK can be chosen when the default one does not suit the installed clang.
+            if (System.getenv('SDKROOT')) buildArgs.add('-ESDKROOT')
             if (project.hasProperty('dryRun')) buildArgs.add('--dry-run')
             if (project.hasProperty('callTree')) buildArgs.add('-H:+PrintAnalysisCallTree')
             classpath.from(files(layout.buildDirectory.dir('generated/picocli-native-image')).builtBy('generatePicocliMetadata'))
@@ -185,6 +188,116 @@ graalvmNative {
             mergeWithExisting = true
         }
     }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Smoke suite (src/smoke): drives an `ict` executable as a black box, one step per operation
+// plus an `ict mcp` handshake, and fails if a registered operation has no step.
+//
+//   ./gradlew jvmSmoke                     against the JVM build
+//   ./gradlew nativeSmoke                  against build/native/nativeCompile/ict
+//   ./gradlew nativeSmoke -PictBinary=...  against a prebuilt binary (CI)
+//   ./gradlew traceSmoke                   JVM build under the tracing agent (needs GRAALVM_HOME),
+//                                          then mergeTracedMetadata; review the diff before commit
+//   ./gradlew nativeStartup                median `ict --help` over ten runs, fails over 100 ms
+// ---------------------------------------------------------------------------------------------
+sourceSets {
+    smoke {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+dependencies {
+    // SmokeSuiteTest checks that every registered operation has a smoke step.
+    testImplementation sourceSets.smoke.output
+}
+
+def mainRuntimeClasspath = sourceSets.main.runtimeClasspath
+def javaBin = { String home -> new File(home, "bin/java${org.gradle.internal.os.OperatingSystem.current().windows ? '.exe' : ''}").path }
+def nativeBinary = providers.gradleProperty('ictBinary').orElse(layout.buildDirectory
+        .file("native/nativeCompile/ict${org.gradle.internal.os.OperatingSystem.current().windows ? '.exe' : ''}")
+        .map { it.asFile.path })
+def tracedMetadataDir = layout.buildDirectory.dir('native-agent/smoke')
+
+tasks.register('jvmSmoke', JavaExec) {
+    group = 'verification'
+    description = 'Run the smoke suite against the JVM build'
+    classpath = sourceSets.smoke.runtimeClasspath
+    mainClass = 'org.ical4j.command.smoke.SmokeSuite'
+    def java = javaBin(System.getProperty('java.home'))
+    argumentProviders.add({ [java, '-cp', mainRuntimeClasspath.asPath, 'org.ical4j.command.cli.Main'] } as CommandLineArgumentProvider)
+}
+
+tasks.register('nativeSmoke', JavaExec) {
+    group = 'verification'
+    description = 'Run the smoke suite against the native executable'
+    classpath = sourceSets.smoke.runtimeClasspath
+    mainClass = 'org.ical4j.command.smoke.SmokeSuite'
+    if (!project.hasProperty('ictBinary')) {
+        dependsOn 'nativeCompile'
+    }
+    argumentProviders.add({ [nativeBinary.get()] } as CommandLineArgumentProvider)
+}
+
+tasks.register('traceSmoke', JavaExec) {
+    group = 'native'
+    description = 'Run the smoke suite against the JVM build under the native-image tracing agent'
+    classpath = sourceSets.smoke.runtimeClasspath
+    mainClass = 'org.ical4j.command.smoke.SmokeSuite'
+    def graalHome = providers.environmentVariable('GRAALVM_HOME')
+    def out = tracedMetadataDir
+    outputs.dir(out)
+    doFirst {
+        if (!graalHome.present) {
+            throw new GradleException('traceSmoke needs GRAALVM_HOME pointing at GraalVM for JDK 25+')
+        }
+        project.delete(out)
+    }
+    argumentProviders.add({
+        [javaBin(graalHome.get()), "-agentlib:native-image-agent=config-merge-dir=${out.get().asFile.path}",
+         '-cp', mainRuntimeClasspath.asPath, 'org.ical4j.command.cli.Main']
+    } as CommandLineArgumentProvider)
+}
+
+// Merges the traced metadata on top of the checked-in file: entries are unioned, never removed,
+// so the hand-written base entries survive. Review `git diff` before committing.
+//
+// Dropped while merging: probes for optional classes that are absent or unwanted (Groovy,
+// JDBC, Micrometer, night-config formats other than the TOML instance passed explicitly) and
+// single zoneinfo files, which the hand-written `zoneinfo/**` glob already covers.
+def tracedNoise = ~/^(groovy\.|java\.sql\.|io\.micrometer\.|com\.electronwill\.nightconfig\.|zoneinfo\/(?!\*\*))/
+tasks.register('mergeTracedMetadata') {
+    group = 'native'
+    description = 'Merge traceSmoke output into src/main/resources/META-INF/native-image/org.ical4j/ict'
+    dependsOn 'traceSmoke'
+    def traced = tracedMetadataDir.map { it.file('reachability-metadata.json') }
+    def checkedIn = layout.projectDirectory.file('src/main/resources/META-INF/native-image/org.ical4j/ict/reachability-metadata.json')
+    doLast {
+        def slurper = new groovy.json.JsonSlurper()
+        def base = slurper.parse(checkedIn.asFile)
+        def extra = slurper.parse(traced.get().asFile)
+        extra.each { section, entries ->
+            if (entries instanceof List) {
+                def merged = (base[section] ?: []) as List
+                entries.findAll { e -> !((e.type ?: e.glob ?: '') ==~ (tracedNoise.pattern() + '.*')) }
+                        .each { e -> if (!merged.contains(e)) merged << e }
+                base[section] = merged.sort { groovy.json.JsonOutput.toJson(it) }
+            }
+        }
+        checkedIn.asFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(base)) + '\n'
+    }
+}
+
+tasks.register('nativeStartup', JavaExec) {
+    group = 'verification'
+    description = 'Report the median `ict --help` wall time of the native executable; fail over 100 ms'
+    classpath = sourceSets.smoke.runtimeClasspath
+    mainClass = 'org.ical4j.command.smoke.StartupTime'
+    if (!project.hasProperty('ictBinary')) {
+        dependsOn 'nativeCompile'
+    }
+    argumentProviders.add({ [nativeBinary.get(), '10', '100'] } as CommandLineArgumentProvider)
 }
 
 // ---------------------------------------------------------------------------------------------

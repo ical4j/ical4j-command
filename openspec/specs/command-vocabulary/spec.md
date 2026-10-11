@@ -2,13 +2,12 @@
 
 ## Purpose
 
-Define a single controlled vocabulary — canonical verbs, entity types, and loci — that all
-command surfaces (CLI, MCP, agent) name operations from. Surfaces share these names but
-dispatch independently (Option B: shared names, separate dispatch). The vocabulary is
-defined in the `ical4j-command-core` module.
+Define a single controlled vocabulary — canonical verbs, entity types, and loci — that every
+operation in the registry is named from, and so every surface (CLI, MCP) exposes. The
+vocabulary is defined in the `vocab` package of the single `ict` module; dispatch lives in the
+operation registry.
 
 ## Requirements
-
 ### Requirement: Operation identity is (verb, type, locus)
 Every operation exposed by any surface (CLI, MCP, agent) SHALL be identified by a tuple of exactly three axes: a **verb** (the action), an **entity type** (what is acted on), and a **locus** (the container the action acts within). Surface-specific naming SHALL be derivable from this tuple.
 
@@ -98,24 +97,14 @@ The system SHALL treat the calendar messaging methods `publish`, `request`, and 
 - **WHEN** `request` and `reply` are mapped to the vocabulary
 - **THEN** both resolve to `send` specialised with their respective iTIP methods, and neither introduces a new top-level verb
 
-### Requirement: Surfaces share vocabulary but dispatch independently
-Each surface (CLI, MCP, agent) SHALL name its operations from the shared vocabulary, but SHALL retain its own dispatch and execution. There SHALL NOT be a shared command-execution core that surfaces delegate into; conformance is enforced by naming rules, not by a common dispatcher.
-
-#### Scenario: No cross-surface execution coupling
-- **WHEN** the MCP layer exposes a `list` operation
-- **THEN** it implements its own dispatch and does not call the CLI's command classes to execute the operation
-
-#### Scenario: Adding a verb to the vocabulary
-- **WHEN** a new canonical verb is added to the vocabulary
-- **THEN** each surface may adopt it independently using the shared name, with no shared dispatcher required to change
-
 ### Requirement: The vocabulary lives in a shared core module
-The canonical verbs, entity types, and loci SHALL be defined as constants/enums in a new shared **core module**. Each surface module (CLI, MCP, agent) SHALL depend on the core module for these names. The core module SHALL contain vocabulary definitions only — it MUST NOT contain command dispatch or execution logic, preserving Option B (shared names, separate dispatch).
+The canonical verbs, entity types, loci, serialization families and send methods SHALL be defined as enums in the `vocab` package of the single `ict` module. The operation registry and every surface SHALL reference these enums rather than declaring their own string literals. The `vocab` package SHALL contain vocabulary definitions only and MUST NOT contain dispatch or execution logic; dispatch lives in the operation registry.
 
-#### Scenario: Surfaces reference core vocabulary constants
+#### Scenario: Surfaces reference vocabulary constants
 - **WHEN** a surface names an operation
-- **THEN** it derives the verb, type, and locus names from the core module's definitions rather than declaring its own string literals
+- **THEN** it derives the verb, type and locus names from the `vocab` enums via the operation's registry entry rather than declaring its own string literals
 
-#### Scenario: Core module carries no dispatch
-- **WHEN** the core module is inspected
-- **THEN** it contains only vocabulary definitions (verbs, types, loci) and no command-execution or dispatch code
+#### Scenario: Vocabulary package carries no dispatch
+- **WHEN** the `vocab` package is inspected
+- **THEN** it contains only vocabulary definitions (verbs, types, loci, families, send methods) and no command-execution or dispatch code
+

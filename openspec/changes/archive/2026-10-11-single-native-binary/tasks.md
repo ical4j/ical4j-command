@@ -63,4 +63,4 @@
 
 - [x] 7.1 Rewrite `README.md` around install, verb-first usage, `--format`, and `ict mcp` client configuration
 - [x] 7.2 Rewrite `docs/command-protocols.md` to describe the registry and the two views; remove per-class listings
-- [ ] 7.3 Archive: update `openspec/specs/command-vocabulary/spec.md` via `openspec archive` once tasks are done
+- [x] 7.3 Archive: update `openspec/specs/command-vocabulary/spec.md` via `openspec archive` once tasks are done

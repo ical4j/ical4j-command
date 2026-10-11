@@ -1,118 +1,134 @@
-# iCal4j Command Protocols
+# Command protocols
 
-This document describes the various command protocols and tools provided by the iCal4j Command library for managing iCalendar and vCard data.
+`ict` has one table of operations, the **registry**, and two **views** over it: the command line
+and the MCP server. An operation is defined once, with its parameters and handler; each view
+derives its own interface from that definition and executes through the registry. Nothing is
+written per surface.
 
-## Canonical Vocabulary
+```
+                    ┌──────────────────────────────┐
+  ict <verb> <type> │  cli.CommandTree             │
+  ────────────────► │  picocli subcommands/options │──┐
+                    └──────────────────────────────┘  │   ┌────────────────────────┐
+                                                      ├──►│ ops.Registry           │──► handler(Context, Params)
+                    ┌──────────────────────────────┐  │   │ (verb, subject, locus) │        │
+  tools/call        │  mcp.Tools                   │──┘   └────────────────────────┘        ▼
+  ────────────────► │  tools + JSON input schemas  │                                     Result
+                    └──────────────────────────────┘                                        │
+                                                       ops.Renderer: text / json / xml  ◄───┘
+```
 
-All command surfaces (CLI, MCP, agent) name operations from a single controlled vocabulary
-defined in the `ical4j-command-core` module. Each operation is identified by a **verb**, an
-**entity type**, and a **locus** (container). Surfaces share these names but dispatch
-independently.
+## Vocabulary
 
-- **Verbs** (`org.ical4j.command.core.Verb`): `list` (many), `get` (one), `generate`
-  (synthesise from a strategy/template), `add` (place into a locus), `update`, `remove`
-  (take out of a locus), `copy`, `move`, `filter`, `validate`, `import`, `export`, `send`,
-  `receive`. There is no `create`/`delete` — these are standardised on `add`/`remove`.
+Operations are named from a controlled vocabulary in `org.ical4j.command.vocab`. The package
+holds definitions only; it has no dispatch logic.
+
+- **Verbs** (`Verb`): `list` (many), `get` (one), `generate` (synthesise from a template), `add`
+  (place into a locus), `update`, `remove` (take out of a locus), `copy`, `move`, `filter`,
+  `validate`, `import`, `export`, `send`, `receive`. There is no `create` or `delete`; those
+  are `add` and `remove`.
 - **Entity types** (`EntityType`): `event`, `action`, `issue`, `note`, `observance`,
-  `availability`, `report`, `entity` (contact), `resource`. All live directly within a
-  collection.
-- **Loci** (`Locus`): `workspace` ⊃ `collection` (two levels; entities live directly in a
-  collection).
-- **Serialization families** (`SerializationFamily`): `calendar` (iCalendar), `card`
-  (vCard). These are NOT loci or entity types; data crosses a collection boundary via
-  `import`/`export`.
-- **iTIP methods** (`SendMethod`): `publish`, `request`, `reply` are specialised forms of
-  `send`, not independent verbs.
+  `availability`, `report`, `entity` (a contact), `resource`. All live directly in a collection.
+- **Serialization families** (`SerializationFamily`): `calendar` (iCalendar) and `card` (vCard),
+  the representations that `import` and `export` move across a collection boundary.
+- **Loci** (`Locus`): `workspace` contains `collection`s, which contain entities; the hierarchy
+  is two levels deep. `channel` is the locus of `send` and `receive`, and `none` marks
+  operations on a stream or file that touch no store, such as `generate`.
+- **iTIP methods** (`SendMethod`): `publish`, `request` and `reply` qualify `send`; they are not
+  verbs.
 
-## Calendar Commands
+The type axis of an operation is a `Subject`: an entity type, a serialization family, or a
+container locus when the container itself is the object (`list collection in workspace`,
+`add collection in workspace`). `channel` and `none` are never subjects.
 
-### Validator
-- Purpose: Validates iCalendar data for conformance to specifications
-- Location: `org.ical4j.command.calendar.Validator`
-- Usage: Validates iCalendar objects for RFC compliance and structural integrity
+## Operations
 
-### Filter
-- Purpose: Filters iCalendar components based on expressions
-- Location: `org.ical4j.command.calendar.FilterCalendar`
-- Usage: Selects subsets of iCalendar components using filter criteria
+An operation is an `ops.Operation`:
 
-### Free/Busy
-- Purpose: Generates availability information
-- Location: `org.ical4j.command.calendar.FreeBusy`
-- Usage: Creates free/busy time reports from calendar data
+| Part | Type | Notes |
+|---|---|---|
+| identity | `OperationId(verb, subject, locus)` | written `list event in collection`, or `generate event` when the locus is `none` |
+| description | `String` | one sentence; becomes CLI help and the MCP tool description |
+| parameters | `List<Param>` | name, type (`string`, `integer`, `boolean`, `enum`, `path`, or a list of one), required flag, default, description |
+| exposure | `Set<Surface>` | `CLI`, `MCP`, or both (the default) |
+| handler | `(Context, Params) -> Result` | the implementation |
 
-### Replace UIDs
-- Purpose: Regenerates unique identifiers
-- Location: `org.ical4j.command.calendar.ReplaceUids`
-- Usage: Updates UIDs across all calendar components
+Handlers follow three rules:
 
-## Collection Management
+- **They return structure, not text.** A `Result` is a calendar, a card, identifiers, one or more
+  descriptors (name/value attributes), a status message or a validation report. `ops.Renderer`
+  turns it into text, JSON or XML for whichever surface asked.
+- **They signal failure with a typed `OperationException`**: `NotFound`, `AlreadyExists`,
+  `Usage`, `InvalidData` or `Store`. Each surface maps these to its own convention.
+- **They touch the world only through their `Context`**: the active workspace, the calendar and
+  card stores, and standard input. Surfaces build the context from configuration; specs build it
+  around a temp-dir store. Handlers never read configuration or write to a stream.
 
-### Calendar Collections
-- Import Calendar (`import-calendar`): Imports calendar data into a collection
-- Export Calendar (`export-calendar`): Exports calendar data from a collection
-- Remove Calendar (`remove-calendar`): Removes calendar data from a collection
-- List: Enumerates calendar entities in a collection
+The `Registry` rejects a second operation with the same identity, and `Operations.standard()`
+assembles the operations the binary ships.
 
-### Card Collections
-- Import Card (`import-card`): Imports vCard data into a collection
-- Export Card (`export-card`): Exports vCard data from a collection
-- Remove Card (`remove-card`): Removes vCard data from a collection
-- List: Enumerates vCard entities in a collection
+## The CLI view
 
-## Channel Operations
+`cli.CommandTree` builds the picocli tree from the registry at startup, using picocli's
+programmatic API so no command class is annotated or reflected on.
 
-### Calendar Channels
-- Send Calendar: Transmits calendar data to specified endpoints. The iTIP methods
-  `publish`, `request` and `reply` are specialised forms of `send`.
-- Receive Calendar: Accepts incoming calendar data
+- One subcommand per verb that has CLI-exposed operations, in vocabulary order, and under each
+  one subcommand per operation, named by its subject: `ict list event`.
+- Every parameter becomes an option, `--<name>`, with the parameter's description, required
+  flag, choices and default in its help. Values reach the handler as strings and are converted
+  there, so no JDK type is ever registered for reflection.
+- Loci are options. `--collection` is the shared `collection` parameter that every
+  collection-locus operation declares, so it appears only where it applies. `--workspace` is a
+  global option that overrides the configured active workspace.
+- Global options (`--workspace`, `--format`, `-v`, `-q`, `--lenient`, `--help`, `--version`)
+  are inherited by every command. A parameter may not reuse one of their names.
+- The CLI names an operation by verb and subject only, so two operations differing only in
+  locus cannot both be exposed to it; the tree builder fails at startup if they are.
 
-### vCard Channels
-- Send vCard: Transmits vCard data to specified endpoints
-- Receive vCard: Accepts incoming vCard data
+Results are rendered in the `--format` requested and written to stdout. Failures write
+`ict: <message>` to stderr and exit 1, or 2 for usage errors (including picocli's own parse
+errors and `OperationException.Usage`). Unexpected exceptions also print a stack trace.
 
-## Store Operations
+`ict config` is the one hand-written command. It edits the configuration the context is built
+from, so it is not an operation.
 
-### Collection Management
-- Add Collection: Adds a collection to a workspace
-- Remove Collection: Removes a collection from a workspace
-- Get Collection: Retrieves collection metadata
-- List Collections: Enumerates available collections
-- Update Collection: Modifies collection properties
+## The MCP view
 
-## Strategy (Generation) Operations
+`mcp.Tools` turns each MCP-exposed operation into a tool and `mcp.McpCommand` serves them with
+the MCP Java SDK's synchronous server on the stdio transport (`ict mcp`).
 
-### Event Templates
-- Purpose: Generates calendar data using simplified templates (the `generate` verb)
-- Location: `org.ical4j.command.strategy.CreateEvent` (command name `generate event`)
-- Usage: Synthesises calendar entries from template definitions
+- Tool names are `<verb>_<subject>`: `list_event`, `import_calendar`. As with the CLI, a name
+  clash fails at startup.
+- The input schema is a JSON schema object generated from the parameters: `string`, `integer`
+  and `boolean` map directly, `enum` becomes a string with `enum` values, `path` a string, and
+  list parameters arrays. Required parameters are listed in `required`, defaults appear as
+  `default`, and unknown properties are rejected.
+- Tools carry `readOnlyHint` for `list`, `get`, `export`, `validate` and `filter`, and
+  `destructiveHint` for `remove`, `move` and `update`.
+- Calendars and cards are returned as iCalendar or vCard text; everything else as JSON text.
+  An `OperationException`, or any other failure, is returned as a tool result with `isError`
+  set and the message as its text. Protocol errors are left to the SDK.
+- The server's stdout carries protocol messages only. `System.out` and picocli's output are
+  pointed at stderr while it runs, logging goes to stderr already, and handlers get an empty
+  stdin. A spec runs the server with `-vvv` and checks every stdout line is JSON-RPC.
 
-## Configuration
+## Adding an operation
 
-### System Properties
-The following properties can be configured:
+An operation enters the registry only with tests and a smoke run (design D8 of the
+`single-native-binary` change):
 
-- `org.ical4j.command.prodid`: Customizes the PRODID property
-- `org.ical4j.command.organizer`: Sets default organizer URI
-- `org.ical4j.command.uidgenerator`: Specifies UID generation implementation
+1. Define it in the `ops` class for its subject and add it to `Operations.standard()`.
+2. Write a Spock specification that runs its handler against a temp-dir store and names its
+   identity as a literal, for example `op('list event in collection')`.
+   `RegistryConformanceTest` fails the build for any registered operation that no
+   specification names.
+3. Add a step to `src/smoke/.../SmokeSuite.java` that invokes it, marked with the identity it
+   covers. The suite, and `SmokeSuiteTest`, fail for any operation without a step.
+4. Run `./gradlew mergeTracedMetadata` with `GRAALVM_HOME` set. This runs the smoke suite on the
+   JVM under the native-image tracing agent and merges what it records into the checked-in
+   reachability metadata. Review the diff.
+5. Check the native binary: `./gradlew nativeSmoke`.
 
-## Common Patterns
-
-### Input/Output Handling
-- Input handling through `InputHandler` interface
-- Output processing via `DefaultOutputHandlers`
-- Support for various data formats and sources
-
-### Command Groups
-- Calendar Command Group: Calendar-specific operations
-- Card Command Group: vCard-specific operations
-- Channel Command Group: Communication operations
-- Collection Command Group: Data collection management
-- Store Command Group: Storage operations
-- Template Command Group: Template-based generation
-
-Each command follows a consistent protocol pattern:
-1. Input validation
-2. Operation execution
-3. Result handling
-4. Error management
+Nothing is needed in `cli` or `mcp`: the command, its options, the tool and its schema all
+follow from the definition. The commands awaiting admission, with the identity each is
+expected to take, are listed in [`dropped-commands.md`](dropped-commands.md).

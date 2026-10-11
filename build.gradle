@@ -14,17 +14,21 @@ buildscript {
 }
 
 plugins {
+    id 'java'
+    id 'groovy'
+    id 'application'
     // 1.20.1 is the minimum that works on Gradle 9 — 1.15.1 and earlier call
     // Provider.forUseAtConfigurationTime(), removed in Gradle 9, so the build
     // fails at configuration time on this repo's Gradle 9.2.1 wrapper.
     id 'pl.allegro.tech.build.axion-release' version '1.20.1'
-    id 'biz.aQute.bnd.builder' version "$bndVersion" apply false
-    id 'com.vanniktech.maven.publish' version '0.34.0' apply false
+    id 'com.vanniktech.maven.publish' version '0.34.0'
+    id 'org.graalvm.buildtools.native' version '1.1.12'
 }
 
 scmVersion {
     tag {
-        prefix = 'ical4j-command-'
+        // Releases are tagged ict-<version>; release.yml builds the native executables from them.
+        prefix = 'ict-'
     }
     versionCreator 'versionWithBranch'
     branchVersionCreator = ['main': 'simple']
@@ -34,92 +38,303 @@ scmVersion {
     }
 }
 
-configure(subprojects) {
-    apply plugin: 'java-library'
-    apply plugin: 'groovy'
-    apply plugin: 'biz.aQute.bnd.builder'
-    apply plugin: 'com.vanniktech.maven.publish'
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url 'https://central.sonatype.com/repository/maven-snapshots/'
+    }
+}
 
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        maven {
-            url 'https://central.sonatype.com/repository/maven-snapshots/'
+group = 'org.ical4j'
+description = 'ict: a single-binary command-line and MCP tool for iCalendar and vCard data'
+version = scmVersion.version
+
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}
+
+dependencies {
+    implementation libs.ical4j.connector.api, libs.ical4j.integration.api, libs.ical4j.serializer,
+            libs.ical4j.vcard, libs.ical4j, libs.ical4j.extensions
+
+    implementation(libs.ical4j) {
+        capabilities {
+            requireCapability("org.mnode.ical4j:ical4j-filter-expressions")
         }
+    }
+
+    implementation libs.picocli, libs.night.config.toml
+
+    // `ict mcp`: stdio server with programmatic tool registration.
+    implementation libs.mcp.core, libs.mcp.json.jackson2
+
+    // Logging: slf4j-simple to stderr only. stdout is reserved for command output and,
+    // under `ict mcp`, for the protocol stream. Level is chosen in cli.Main before any
+    // logger is created (see LogLevel).
+    implementation libs.slf4j.api
+    runtimeOnly libs.slf4j.simple
+
+    testImplementation platform(libs.spock.bom), libs.spock.core
+    testRuntimeOnly libs.junit.platform
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// The version shown by `ict --version`. A resource rather than the manifest, which neither the
+// native image nor an in-process test run has.
+processResources {
+    def v = version.toString()
+    inputs.property('version', v)
+    filesMatching('org/ical4j/command/version.properties') {
+        expand(version: v)
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': 'iCal4j Command-line Tool',
+                'Implementation-Version': version,
+                'Implementation-Vendor': 'Ben Fortuna'
+        )
+    }
+}
+
+application {
+    mainClass = 'org.ical4j.command.cli.Main'
+    applicationName = 'ict'
+}
+
+startScripts {
+    classpath = files('lib/*')
+}
+
+// ---------------------------------------------------------------------------------------------
+// GraalVM native image
+//
+// Build with GRAALVM_HOME pointing at GraalVM CE for JDK 25 or later:
+//   GRAALVM_HOME=... JAVA_HOME=$GRAALVM_HOME ./gradlew nativeCompile --no-configuration-cache
+// ---------------------------------------------------------------------------------------------
+
+// picocli-codegen's annotation processor fails on this tree ("ArgGroup has no options or
+// positional parameters" for @ArgGroup fields inherited from abstract, non-@Command superclasses).
+// picocli's runtime generators build the model exactly as the app does, so use those instead.
+configurations { picocliCodegen }
+dependencies {
+    picocliCodegen libs.picocli.codegen
+}
+
+def picocliMetadataDir = layout.buildDirectory.dir('generated/picocli-native-image/META-INF/native-image/org.ical4j/ict')
+
+[reflect: 'ReflectionConfigGenerator', resource: 'ResourceConfigGenerator', proxy: 'DynamicProxyConfigGenerator'].each { kind, gen ->
+    tasks.register("generatePicocli${kind.capitalize()}Config", JavaExec) {
+        group = 'native'
+        description = "Generate GraalVM ${kind}-config.json for the picocli command tree"
+        classpath = configurations.picocliCodegen + sourceSets.main.runtimeClasspath
+        mainClass = "picocli.codegen.aot.graalvm.${gen}"
+        def out = picocliMetadataDir.map { it.file("${kind}-config.json") }
+        args = ['--output', out.get().asFile.path, 'org.ical4j.command.cli.Main']
+        outputs.file(out)
+        if (kind == 'reflect') {
+            // picocli registers every option/parameter type with all methods. Registering
+            // java.net.URL makes URL.getContent() a reflective root, whose JDK content handlers
+            // for images and audio live in java.desktop and drag AWT + javax.sound into the image.
+            doLast {
+                def f = out.get().asFile
+                def json = new groovy.json.JsonSlurper().parse(f)
+                json.removeAll { it.name == 'java.net.URL' }
+                f.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
+            }
+        }
+    }
+}
+
+tasks.register('generatePicocliMetadata') {
+    group = 'native'
+    description = 'Generate all GraalVM metadata for the picocli command tree'
+    dependsOn 'generatePicocliReflectConfig', 'generatePicocliResourceConfig', 'generatePicocliProxyConfig'
+}
+
+graalvmNative {
+    // Use GRAALVM_HOME / JAVA_HOME rather than Gradle toolchain resolution.
+    toolchainDetection = false
+    // The shared reachability-metadata repository needs GraalVM for JDK 23+.
+    // Pass -PnoMetadataRepo to compile on an older GraalVM without it.
+    metadataRepository { enabled = !project.hasProperty('noMetadataRepo') }
+    binaries {
+        main {
+            imageName = 'ict'
+            mainClass = 'org.ical4j.command.cli.Main'
+            // native-gradle-plugin 1.1.12 passes --shared with this config unless set explicitly.
+            sharedLibrary = false
+            buildArgs.add('-H:+ReportExceptionStackTraces')
+            // native-image runs its C toolchain with a clean environment. Pass SDKROOT through so
+            // a macOS SDK can be chosen when the default one does not suit the installed clang.
+            if (System.getenv('SDKROOT')) buildArgs.add('-ESDKROOT')
+            if (project.hasProperty('dryRun')) buildArgs.add('--dry-run')
+            if (project.hasProperty('callTree')) buildArgs.add('-H:+PrintAnalysisCallTree')
+            classpath.from(files(layout.buildDirectory.dir('generated/picocli-native-image')).builtBy('generatePicocliMetadata'))
+        }
+    }
+    // Tracing agent for a JVM run: ./gradlew -Pagent run --args='...' then ./gradlew metadataCopy
+    agent {
+        defaultMode = 'standard'
+        metadataCopy {
+            inputTaskNames.add('run')
+            outputDirectories.add('src/main/resources/META-INF/native-image/org.ical4j/ict')
+            mergeWithExisting = true
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Smoke suite (src/smoke): drives an `ict` executable as a black box, one step per operation
+// plus an `ict mcp` handshake, and fails if a registered operation has no step.
+//
+//   ./gradlew jvmSmoke                     against the JVM build
+//   ./gradlew nativeSmoke                  against build/native/nativeCompile/ict
+//   ./gradlew nativeSmoke -PictBinary=...  against a prebuilt binary (CI)
+//   ./gradlew traceSmoke                   JVM build under the tracing agent (needs GRAALVM_HOME),
+//                                          then mergeTracedMetadata; review the diff before commit
+//   ./gradlew nativeStartup                median `ict --help` over ten runs, fails over 100 ms
+// ---------------------------------------------------------------------------------------------
+sourceSets {
+    smoke {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+dependencies {
+    // SmokeSuiteTest checks that every registered operation has a smoke step.
+    testImplementation sourceSets.smoke.output
+}
+
+def mainRuntimeClasspath = sourceSets.main.runtimeClasspath
+def javaBin = { String home -> new File(home, "bin/java${org.gradle.internal.os.OperatingSystem.current().windows ? '.exe' : ''}").path }
+def nativeBinary = providers.gradleProperty('ictBinary').orElse(layout.buildDirectory
+        .file("native/nativeCompile/ict${org.gradle.internal.os.OperatingSystem.current().windows ? '.exe' : ''}")
+        .map { it.asFile.path })
+def tracedMetadataDir = layout.buildDirectory.dir('native-agent/smoke')
+
+tasks.register('jvmSmoke', JavaExec) {
+    group = 'verification'
+    description = 'Run the smoke suite against the JVM build'
+    classpath = sourceSets.smoke.runtimeClasspath
+    mainClass = 'org.ical4j.command.smoke.SmokeSuite'
+    def java = javaBin(System.getProperty('java.home'))
+    argumentProviders.add({ [java, '-cp', mainRuntimeClasspath.asPath, 'org.ical4j.command.cli.Main'] } as CommandLineArgumentProvider)
+}
+
+tasks.register('nativeSmoke', JavaExec) {
+    group = 'verification'
+    description = 'Run the smoke suite against the native executable'
+    classpath = sourceSets.smoke.runtimeClasspath
+    mainClass = 'org.ical4j.command.smoke.SmokeSuite'
+    if (!project.hasProperty('ictBinary')) {
+        dependsOn 'nativeCompile'
+    }
+    argumentProviders.add({ [nativeBinary.get()] } as CommandLineArgumentProvider)
+}
+
+tasks.register('traceSmoke', JavaExec) {
+    group = 'native'
+    description = 'Run the smoke suite against the JVM build under the native-image tracing agent'
+    classpath = sourceSets.smoke.runtimeClasspath
+    mainClass = 'org.ical4j.command.smoke.SmokeSuite'
+    def graalHome = providers.environmentVariable('GRAALVM_HOME')
+    def out = tracedMetadataDir
+    outputs.dir(out)
+    doFirst {
+        if (!graalHome.present) {
+            throw new GradleException('traceSmoke needs GRAALVM_HOME pointing at GraalVM for JDK 25+')
+        }
+        project.delete(out)
+    }
+    argumentProviders.add({
+        [javaBin(graalHome.get()), "-agentlib:native-image-agent=config-merge-dir=${out.get().asFile.path}",
+         '-cp', mainRuntimeClasspath.asPath, 'org.ical4j.command.cli.Main']
+    } as CommandLineArgumentProvider)
+}
+
+// Merges the traced metadata on top of the checked-in file: entries are unioned, never removed,
+// so the hand-written base entries survive. Review `git diff` before committing.
+//
+// Dropped while merging: probes for optional classes that are absent or unwanted (Groovy,
+// JDBC, Micrometer, night-config formats other than the TOML instance passed explicitly) and
+// single zoneinfo files, which the hand-written `zoneinfo/**` glob already covers.
+def tracedNoise = ~/^(groovy\.|java\.sql\.|io\.micrometer\.|com\.electronwill\.nightconfig\.|zoneinfo\/(?!\*\*))/
+tasks.register('mergeTracedMetadata') {
+    group = 'native'
+    description = 'Merge traceSmoke output into src/main/resources/META-INF/native-image/org.ical4j/ict'
+    dependsOn 'traceSmoke'
+    def traced = tracedMetadataDir.map { it.file('reachability-metadata.json') }
+    def checkedIn = layout.projectDirectory.file('src/main/resources/META-INF/native-image/org.ical4j/ict/reachability-metadata.json')
+    doLast {
+        def slurper = new groovy.json.JsonSlurper()
+        def base = slurper.parse(checkedIn.asFile)
+        def extra = slurper.parse(traced.get().asFile)
+        extra.each { section, entries ->
+            if (entries instanceof List) {
+                def merged = (base[section] ?: []) as List
+                entries.findAll { e -> !((e.type ?: e.glob ?: '') ==~ (tracedNoise.pattern() + '.*')) }
+                        .each { e -> if (!merged.contains(e)) merged << e }
+                base[section] = merged.sort { groovy.json.JsonOutput.toJson(it) }
+            }
+        }
+        checkedIn.asFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(base)) + '\n'
+    }
+}
+
+tasks.register('nativeStartup', JavaExec) {
+    group = 'verification'
+    description = 'Report the median `ict --help` wall time of the native executable; fail over 100 ms'
+    classpath = sourceSets.smoke.runtimeClasspath
+    mainClass = 'org.ical4j.command.smoke.StartupTime'
+    if (!project.hasProperty('ictBinary')) {
+        dependsOn 'nativeCompile'
+    }
+    argumentProviders.add({ [nativeBinary.get(), '10', '100'] } as CommandLineArgumentProvider)
+}
+
+// ---------------------------------------------------------------------------------------------
+// Publishing to the Sonatype Central Portal via the vanniktech plugin. Host, auto-release and
+// signing toggles live in gradle.properties (SONATYPE_HOST, SONATYPE_AUTOMATIC_RELEASE,
+// RELEASE_SIGNING_ENABLED). Credentials and the signing key are supplied via
+// ORG_GRADLE_PROJECT_* env vars in CI. The jar is published for embedding; the native binary
+// attached to GitHub Releases is the primary deliverable.
+// ---------------------------------------------------------------------------------------------
+mavenPublishing {
+    coordinates(group.toString(), 'ict', version.toString())
+
+    pom {
+        name = 'ict'
+        description = project.description
+        url = 'http://ical4j.github.io'
+
+        licenses {
+            license {
+                name = 'iCal4j - License'
+                url = 'https://raw.githubusercontent.com/ical4j/ical4j/master/LICENSE'
+                distribution = 'repo'
+            }
         }
 
-    group = 'org.ical4j'
-    description = '''\
-Manipulate iCalendar data
-'''
-    version = rootProject.scmVersion.version
-
-    java {
-        sourceCompatibility = 17
-        targetCompatibility = 17
-    }
-
-    test {
-        useJUnitPlatform()
-    }
-
-    dependencies {
-        api libs.ical4j.connector.api, libs.ical4j.integration.api, libs.ical4j.serializer,
-                libs.ical4j.vcard, libs.ical4j, libs.ical4j.extensions
-
-
-//    implementation ("org.eclipse.jetty:jetty-server:$jettyVersion") {
-//        exclude group: 'org.slf4j', module: 'slf4j-api'
-//    }
-//    implementation ("org.eclipse.jetty:jetty-servlet:$jettyVersion") {
-//        exclude group: 'org.slf4j', module: 'slf4j-api'
-//    }
-//    implementation 'org.glassfish.jersey.containers:jersey-container-jetty-http:3.1.1',
-//            'org.glassfish.jersey.inject:jersey-hk2:3.1.1'
-
-//    compileOnly "biz.aQute.bnd:biz.aQute.bndlib:$bndVersion"
-        annotationProcessor 'org.osgi:osgi.core:8.0.0',
-                'org.osgi:org.osgi.service.component.annotations:1.5.0',
-                'org.osgi:org.osgi.service.metatype.annotations:1.4.1',
-                'org.osgi:org.osgi.annotation:6.0.0'
-        // spock
-        testImplementation platform(libs.spock.bom), libs.spock.core
-
-        testRuntimeOnly libs.junit.platform
-    }
-
-    // Publishing to the Sonatype Central Portal is configured via the vanniktech plugin.
-    // Host, auto-release and signing toggles live in gradle.properties
-    // (SONATYPE_HOST, SONATYPE_AUTOMATIC_RELEASE, RELEASE_SIGNING_ENABLED).
-    // Credentials and the signing key are supplied via ORG_GRADLE_PROJECT_* env vars in CI.
-    mavenPublishing {
-        coordinates(group.toString(), project.name, version.toString())
-
-        pom {
-            name = project.name
-            description = project.description
-            url = 'http://ical4j.github.io'
-
-            licenses {
-                license {
-                    name = 'iCal4j - License'
-                    url = 'https://raw.githubusercontent.com/ical4j/ical4j/master/LICENSE'
-                    distribution = 'repo'
-                }
+        developers {
+            developer {
+                id = 'fortuna'
+                name = 'Ben Fortuna'
             }
+        }
 
-            developers {
-                developer {
-                    id = 'fortuna'
-                    name = 'Ben Fortuna'
-                }
-            }
-
-            scm {
-                url = 'https://github.com/ical4j/ical4j-command'
-                connection = 'scm:git@github.com:ical4j/ical4j-command.git'
-                developerConnection = 'scm:git@github.com:ical4j/ical4j-command.git'
-            }
+        scm {
+            url = 'https://github.com/ical4j/ical4j-command'
+            connection = 'scm:git@github.com:ical4j/ical4j-command.git'
+            developerConnection = 'scm:git@github.com:ical4j/ical4j-command.git'
         }
     }
 }

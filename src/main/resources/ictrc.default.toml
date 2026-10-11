@@ -1,0 +1,14 @@
+# Default ict configuration, copied to <data dir>/iCal4j/ictrc.toml on first use.
+
+[user]
+    agent = "ict/1.0"
+
+[workspace]
+    active = "default"
+
+[store]
+    calendar.path = "calendars"
+    card.path = "vcards"
+
+[contentType]
+    default = "text/plain"

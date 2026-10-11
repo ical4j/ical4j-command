@@ -1,11 +1,13 @@
 SHELL:=/bin/bash
-include .env
+# Optional local settings (GRADLE_VERSION, GRAALVM_HOME, SDKROOT, ...).
+-include .env
+export GRAALVM_HOME SDKROOT
 
 NEXT_VERSION=$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 CHANGE_JUSTIFICATION=$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 
-.PHONY: all gradlew clean check build changelog currentVersion markNextVersion tag push run \
-	verify release publish
+.PHONY: all gradlew clean check test build installDist dist native smoke changelog currentVersion \
+	markNextVersion install verify release publish
 
 all: check
 
@@ -30,9 +32,13 @@ installDist:
 dist:
 	./gradlew distZip
 
-uploadDist: dist
-	AWS_PROFILE=$(AWS_PROFILE) aws s3 sync --endpoint=$(AWS_ENDPOINT) --acl public-read --exclude "*" --include "*.zip" \
-		build/distributions $(DIST_BUCKET)/releases
+# Native executable at build/native/nativeCompile/ict. Needs GRAALVM_HOME (GraalVM CE for JDK 25+).
+native:
+	$(if $(GRAALVM_HOME),JAVA_HOME=$(GRAALVM_HOME)) ./gradlew nativeCompile --no-configuration-cache
+
+# Smoke suite and startup time against the native executable built by `make native`.
+smoke: native
+	./gradlew nativeSmoke nativeStartup -PictBinary=build/native/nativeCompile/ict
 
 changelog:
 	git log "$(CHANGELOG_START_TAG)...$(CHANGELOG_END_TAG)" \
@@ -48,8 +54,10 @@ install:
 	./gradlew publishToMavenLocal
 
 verify:
-	./gradlew verify
+	./gradlew check jvmSmoke
 
+# Tags ict-<version> and pushes it; release.yml then builds and smoke-tests the native
+# executables on each platform, attaches them to a GitHub Release and publishes the jar.
 release: verify
 	./gradlew release
 

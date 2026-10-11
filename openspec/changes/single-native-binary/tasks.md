@@ -27,12 +27,12 @@
 
 ## 3. CLI surface
 
-- [ ] 3.1 Implement the picocli tree builder: one subcommand per verb, one per (verb, type) under it, options from `Param` descriptors
-- [ ] 3.2 Global options: `--workspace`, `--collection`, `--format`, `--verbose`, `--quiet`, `--version`; picocli out/err wired explicitly
-- [ ] 3.3 Exit-code mapping: 0 success, 1 operation failure, 2 usage error
-- [ ] 3.4 `ict config` command ported from `ConfigureCommand`
-- [ ] 3.5 Spock specs for the tree builder: help grouping, option derivation, exit codes, stdout/stderr separation
-- [ ] 3.6 End-to-end spec running `Main` in-process against a temp-dir store for each first-cohort operation
+- [x] 3.1 Implement the picocli tree builder: one subcommand per verb, one per (verb, type) under it, options from `Param` descriptors
+- [x] 3.2 Global options: `--workspace`, `--collection`, `--format`, `--verbose`, `--quiet`, `--version`; picocli out/err wired explicitly
+- [x] 3.3 Exit-code mapping: 0 success, 1 operation failure, 2 usage error
+- [x] 3.4 `ict config` command ported from `ConfigureCommand`
+- [x] 3.5 Spock specs for the tree builder: help grouping, option derivation, exit codes, stdout/stderr separation
+- [x] 3.6 End-to-end spec running `Main` in-process against a temp-dir store for each first-cohort operation
 
 ## 4. MCP surface
 

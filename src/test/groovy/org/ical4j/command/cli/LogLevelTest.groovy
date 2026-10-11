@@ -1,4 +1,4 @@
-package org.ical4j.command
+package org.ical4j.command.cli
 
 import spock.lang.Specification
 
@@ -20,6 +20,30 @@ class LogLevelTest extends Specification {
         ['--', '-v']                  | null
         ['-verbose']                  | null
         ['-version']                  | null
+    }
+
+    def 'quiet selects error unless verbosity or the environment says otherwise'() {
+        given:
+        def previous = System.getProperty('org.slf4j.simpleLogger.defaultLogLevel')
+        System.clearProperty('org.slf4j.simpleLogger.defaultLogLevel')
+
+        when:
+        LogLevel.configure(args as String[], env)
+
+        then:
+        System.getProperty('org.slf4j.simpleLogger.defaultLogLevel') == level
+
+        cleanup:
+        if (previous == null) System.clearProperty('org.slf4j.simpleLogger.defaultLogLevel')
+        else System.setProperty('org.slf4j.simpleLogger.defaultLogLevel', previous)
+
+        where:
+        args                    | env    | level
+        ['-q', 'list']          | null   | 'error'
+        ['--quiet']             | null   | 'error'
+        ['-q', '-v']            | null   | 'info'
+        ['-q']                  | 'warn' | 'warn'
+        ['--', '-q']            | null   | null
     }
 
     def 'environment overrides flags'() {

@@ -67,7 +67,7 @@ dependencies {
     implementation libs.picocli, libs.night.config.toml
 
     // Logging: slf4j-simple to stderr only. stdout is reserved for command output and,
-    // under `ict mcp`, for the protocol stream. Level is chosen in CommandMain before any
+    // under `ict mcp`, for the protocol stream. Level is chosen in cli.Main before any
     // logger is created (see LogLevel).
     implementation libs.slf4j.api
     runtimeOnly libs.slf4j.simple
@@ -78,6 +78,16 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+// The version shown by `ict --version`. A resource rather than the manifest, which neither the
+// native image nor an in-process test run has.
+processResources {
+    def v = version.toString()
+    inputs.property('version', v)
+    filesMatching('org/ical4j/command/version.properties') {
+        expand(version: v)
+    }
 }
 
 jar {
@@ -91,7 +101,7 @@ jar {
 }
 
 application {
-    mainClass = 'org.ical4j.command.CommandMain'
+    mainClass = 'org.ical4j.command.cli.Main'
     applicationName = 'ict'
 }
 
@@ -123,7 +133,7 @@ def picocliMetadataDir = layout.buildDirectory.dir('generated/picocli-native-ima
         classpath = configurations.picocliCodegen + sourceSets.main.runtimeClasspath
         mainClass = "picocli.codegen.aot.graalvm.${gen}"
         def out = picocliMetadataDir.map { it.file("${kind}-config.json") }
-        args = ['--output', out.get().asFile.path, 'org.ical4j.command.CommandMain']
+        args = ['--output', out.get().asFile.path, 'org.ical4j.command.cli.Main']
         outputs.file(out)
         if (kind == 'reflect') {
             // picocli registers every option/parameter type with all methods. Registering
@@ -154,7 +164,7 @@ graalvmNative {
     binaries {
         main {
             imageName = 'ict'
-            mainClass = 'org.ical4j.command.CommandMain'
+            mainClass = 'org.ical4j.command.cli.Main'
             // native-gradle-plugin 1.1.12 passes --shared with this config unless set explicitly.
             sharedLibrary = false
             buildArgs.add('-H:+ReportExceptionStackTraces')

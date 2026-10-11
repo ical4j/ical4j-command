@@ -16,8 +16,8 @@ class ListOperationsTest extends Specification {
 
     def setup() {
         ctx = context(dir)
-        op('add collection in workspace').execute(ctx, Params.of(name: 'work'))
-        op('add collection in workspace').execute(ctx, Params.of(name: 'people', type: 'card'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'work'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'people', type: 'card'))
         op('import calendar in collection').execute(ctx, Params.of(collection: 'work', file: write(dir, 'e1.ics', event('e1@ict', 'Standup', '20260910T090000Z')).toString()))
         op('import calendar in collection').execute(ctx, Params.of(collection: 'work', file: write(dir, 'e2.ics', event('e2@ict', 'Review', '20260911T090000Z')).toString()))
         op('import calendar in collection').execute(ctx, Params.of(collection: 'work', file: write(dir, 't1.ics', todo('t1@ict', 'Write spec')).toString()))

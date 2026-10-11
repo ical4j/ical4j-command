@@ -57,6 +57,7 @@ Handlers return domain objects (`Calendar`, `VCard`, lists of `Uid`, collection 
 `ict <verb> <type> [--workspace W] [--collection C] [args]`. Loci are options, not positionals. `generate <type>` takes no locus. `import|export <family>` and `send|receive` follow the same pattern. Locus management stays as `ict add collection`, `ict list workspace` and so on, since workspace and collection are also types the vocabulary already names.
 
 - **Why:** matches the spec tuple order and the user's choice. Help output groups by verb.
+- **As built (task 3.x):** `--workspace`, `--format`, `--verbose`, `--quiet` and `--lenient` are inherited global options. `--collection` is not global: it is the shared `collection` parameter that every collection-locus operation declares, including those whose subject is the collection itself (`ict get collection --collection work`), so it appears, with the right required-ness, only on commands that use it. A parameter may not reuse a global option's name, and two operations may not share a verb and subject, since the CLI omits the locus; both fail at startup.
 - **Alternative considered:** type-first (`ict event list`), which groups help by type. Purely UX; both derive from the registry.
 
 ### D5 — MCP via the MCP Java SDK, programmatic registration, stdio

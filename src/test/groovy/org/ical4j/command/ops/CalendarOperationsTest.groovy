@@ -16,7 +16,7 @@ class CalendarOperationsTest extends Specification {
 
     def setup() {
         ctx = context(dir)
-        op('add collection in workspace').execute(ctx, Params.of(name: 'events'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'events'))
     }
 
     def "'import calendar in collection' merges a file and reports the UIDs"() {

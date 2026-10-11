@@ -1,4 +1,4 @@
-package org.ical4j.command;
+package org.ical4j.command.cli;
 
 import java.util.Locale;
 
@@ -12,8 +12,8 @@ import java.util.Locale;
  * property that overrides {@code simplelogger.properties}.
  * <p>
  * Precedence: {@code ICT_LOG_LEVEL} (trace, debug, info, warn, error, off) wins over the flags;
- * {@code -v} selects info, {@code -vv} debug, {@code -vvv} trace; otherwise the default from
- * {@code simplelogger.properties} applies.
+ * {@code -v} selects info, {@code -vv} debug, {@code -vvv} trace; {@code -q} selects error;
+ * otherwise the default from {@code simplelogger.properties} applies.
  */
 final class LogLevel {
 
@@ -31,6 +31,9 @@ final class LogLevel {
     static void configure(String[] args, String envLevel) {
         String level = envLevel != null && !envLevel.isBlank() ? envLevel.trim().toLowerCase(Locale.ROOT)
                 : fromVerbosity(countVerbose(args));
+        if (level == null && isQuiet(args)) {
+            level = "error";
+        }
         if (level != null) {
             System.setProperty(PROPERTY, level);
         }
@@ -50,6 +53,18 @@ final class LogLevel {
             }
         }
         return count;
+    }
+
+    static boolean isQuiet(String[] args) {
+        for (String arg : args) {
+            if ("--".equals(arg)) {
+                break;
+            }
+            if ("-q".equals(arg) || "--quiet".equals(arg)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static String fromVerbosity(int count) {

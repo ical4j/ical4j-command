@@ -18,8 +18,6 @@ import java.util.Map;
  */
 final class CollectionOperations {
 
-    private static final Param NAME = Param.string("name", "Name of the collection").asRequired();
-
     private static final Param DESCRIPTION = Param.string("description", "Description of the collection");
 
     private CollectionOperations() {
@@ -32,9 +30,9 @@ final class CollectionOperations {
     static Operation add() {
         return Operation.define(Verb.ADD, Locus.COLLECTION, Locus.WORKSPACE)
                 .description("Add a new collection to the active workspace")
-                .params(NAME, Stores.TYPE, DESCRIPTION)
+                .params(Stores.COLLECTION, Stores.TYPE, DESCRIPTION)
                 .handler((context, params) -> {
-                    String name = params.require("name");
+                    String name = params.require("collection");
                     SerializationFamily family = Stores.family(params);
                     ObjectStore<? extends ObjectCollection<?>> store = Stores.store(context, family);
                     if (Stores.exists(store, name, context.activeWorkspace())) {
@@ -66,9 +64,9 @@ final class CollectionOperations {
     static Operation get() {
         return Operation.define(Verb.GET, Locus.COLLECTION, Locus.WORKSPACE)
                 .description("Describe a collection in the active workspace")
-                .params(NAME, Stores.TYPE)
+                .params(Stores.COLLECTION, Stores.TYPE)
                 .handler((context, params) -> {
-                    String name = params.require("name");
+                    String name = params.require("collection");
                     SerializationFamily family = Stores.family(params);
                     ObjectCollection<?> collection = Stores.collection(Stores.store(context, family), name,
                             context.activeWorkspace());
@@ -80,9 +78,9 @@ final class CollectionOperations {
     static Operation remove() {
         return Operation.define(Verb.REMOVE, Locus.COLLECTION, Locus.WORKSPACE)
                 .description("Remove a collection and everything in it from the active workspace")
-                .params(NAME, Stores.TYPE)
+                .params(Stores.COLLECTION, Stores.TYPE)
                 .handler((context, params) -> {
-                    String name = params.require("name");
+                    String name = params.require("collection");
                     SerializationFamily family = Stores.family(params);
                     ObjectCollection<?> collection = Stores.collection(Stores.store(context, family), name,
                             context.activeWorkspace());

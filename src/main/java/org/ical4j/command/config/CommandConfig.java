@@ -32,6 +32,7 @@ package org.ical4j.command.config;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import org.ical4j.command.ops.Context;
@@ -43,6 +44,8 @@ import org.ical4j.connector.local.LocalCalendarStore;
 import org.ical4j.connector.local.LocalCardStore;
 
 import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Persists command configuration in {@code <data dir>/iCal4j/ictrc.toml} and builds the
@@ -167,11 +170,39 @@ public class CommandConfig {
      * stores, and standard input.
      */
     public Context context() {
+        return contextBuilder().build();
+    }
+
+    /**
+     * A context builder populated from this configuration, for surfaces that override the
+     * workspace or standard input.
+     */
+    public Context.Builder contextBuilder() {
         return Context.builder()
                 .activeWorkspace(getActiveWorkspace())
                 .calendarStore(this::getCalendarStore)
                 .cardStore(this::getCardStore)
-                .stdin(() -> System.in)
-                .build();
+                .stdin(() -> System.in);
+    }
+
+    /**
+     * Every setting as a flat {@code section.key} to value map, in file order.
+     */
+    public Map<String, String> entries() {
+        fileConfig.load();
+        Map<String, String> entries = new LinkedHashMap<>();
+        flatten("", fileConfig, entries);
+        return entries;
+    }
+
+    private static void flatten(String prefix, UnmodifiableConfig config, Map<String, String> into) {
+        for (UnmodifiableConfig.Entry e : config.entrySet()) {
+            Object value = e.getValue();
+            if (value instanceof UnmodifiableConfig nested) {
+                flatten(prefix + e.getKey() + ".", nested, into);
+            } else {
+                into.put(prefix + e.getKey(), String.valueOf(value));
+            }
+        }
     }
 }

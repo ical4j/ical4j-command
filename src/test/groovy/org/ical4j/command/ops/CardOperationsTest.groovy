@@ -16,7 +16,7 @@ class CardOperationsTest extends Specification {
 
     def setup() {
         ctx = context(dir)
-        op('add collection in workspace').execute(ctx, Params.of(name: 'people', type: 'card'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'people', type: 'card'))
     }
 
     def "'import card in collection' merges a file and reports the UIDs"() {

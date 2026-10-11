@@ -18,20 +18,20 @@ class CollectionOperationsTest extends Specification {
         def ctx = context(dir)
 
         when:
-        def result = op('add collection in workspace').execute(ctx, Params.of(name: 'events'))
+        def result = op('add collection in workspace').execute(ctx, Params.of(collection: 'events'))
 
         then:
         (result as Result.Status).message() == "Added calendar collection 'events'"
         dir.resolve('calendars/work/events').toFile().directory
 
         when:
-        op('add collection in workspace').execute(ctx, Params.of(name: 'people', type: 'card'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'people', type: 'card'))
 
         then:
         dir.resolve('vcards/work/people').toFile().directory
 
         when:
-        op('add collection in workspace').execute(ctx, Params.of(name: 'events'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'events'))
 
         then:
         thrown(OperationException.AlreadyExists)
@@ -46,10 +46,10 @@ class CollectionOperationsTest extends Specification {
     def "'get collection in workspace' describes a collection and reports missing ones"() {
         given:
         def ctx = context(dir)
-        op('add collection in workspace').execute(ctx, Params.of(name: 'events'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'events'))
 
         when:
-        def result = op('get collection in workspace').execute(ctx, Params.of(name: 'events')) as Result.Descriptor
+        def result = op('get collection in workspace').execute(ctx, Params.of(collection: 'events')) as Result.Descriptor
 
         then:
         result.attributes().name == 'events'
@@ -57,13 +57,13 @@ class CollectionOperationsTest extends Specification {
         result.attributes().objects == '0'
 
         when:
-        op('add collection in workspace').execute(ctx, Params.of(name: 'notes', description: 'Scratch notes'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'notes', description: 'Scratch notes'))
 
         then:
-        (op('get collection in workspace').execute(ctx, Params.of(name: 'notes')) as Result.Descriptor).attributes().description == 'Scratch notes'
+        (op('get collection in workspace').execute(ctx, Params.of(collection: 'notes')) as Result.Descriptor).attributes().description == 'Scratch notes'
 
         when:
-        op('get collection in workspace').execute(ctx, Params.of(name: 'missing'))
+        op('get collection in workspace').execute(ctx, Params.of(collection: 'missing'))
 
         then:
         thrown(OperationException.NotFound)
@@ -72,17 +72,17 @@ class CollectionOperationsTest extends Specification {
     def "'remove collection in workspace' deletes the collection directory"() {
         given:
         def ctx = context(dir)
-        op('add collection in workspace').execute(ctx, Params.of(name: 'events'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'events'))
 
         when:
-        def result = op('remove collection in workspace').execute(ctx, Params.of(name: 'events'))
+        def result = op('remove collection in workspace').execute(ctx, Params.of(collection: 'events'))
 
         then:
         (result as Result.Status).message() == "Removed calendar collection 'events'"
         !dir.resolve('calendars/work/events').toFile().exists()
 
         when:
-        op('remove collection in workspace').execute(ctx, Params.of(name: 'events'))
+        op('remove collection in workspace').execute(ctx, Params.of(collection: 'events'))
 
         then:
         thrown(OperationException.NotFound)
@@ -91,9 +91,9 @@ class CollectionOperationsTest extends Specification {
     def "'list collection in workspace' lists calendar and card collections of the active workspace only"() {
         given:
         def ctx = context(dir)
-        op('add collection in workspace').execute(ctx, Params.of(name: 'events'))
-        op('add collection in workspace').execute(ctx, Params.of(name: 'people', type: 'card'))
-        op('add collection in workspace').execute(context(dir, 'other'), Params.of(name: 'elsewhere'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'events'))
+        op('add collection in workspace').execute(ctx, Params.of(collection: 'people', type: 'card'))
+        op('add collection in workspace').execute(context(dir, 'other'), Params.of(collection: 'elsewhere'))
 
         when:
         def result = op('list collection in workspace').execute(ctx, Params.empty()) as Result.Descriptors

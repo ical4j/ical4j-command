@@ -27,7 +27,8 @@ plugins {
 
 scmVersion {
     tag {
-        prefix = 'ical4j-command-'
+        // Releases are tagged ict-<version>; release.yml builds the native executables from them.
+        prefix = 'ict-'
     }
     versionCreator 'versionWithBranch'
     branchVersionCreator = ['main': 'simple']

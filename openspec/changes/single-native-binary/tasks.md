@@ -53,11 +53,11 @@
 
 ## 6. CI and distribution
 
-- [ ] 6.1 `build.yml`: JVM tests on PRs plus a single linux x64 native smoke job
-- [ ] 6.2 `release.yml`: on `ict-*` tags, native matrix (linux x64, linux arm64, macOS arm64, windows x64), checksums, GitHub Release upload
-- [ ] 6.3 `publish-snapshots.yml`: publish the single `org.ical4j:ict` jar; drop the multi-module assumptions
-- [ ] 6.4 Update `Makefile` targets (`native`, `smoke`, `release`) and remove the S3 `uploadDist` target
-- [ ] 6.5 Update axion-release tag prefix to `ict-`
+- [x] 6.1 `build.yml`: JVM tests on PRs plus a single linux x64 native smoke job
+- [x] 6.2 `release.yml`: on `ict-*` tags, native matrix (linux x64, linux arm64, macOS arm64, windows x64), checksums, GitHub Release upload
+- [x] 6.3 `publish-snapshots.yml`: publish the single `org.ical4j:ict` jar; drop the multi-module assumptions
+- [x] 6.4 Update `Makefile` targets (`native`, `smoke`, `release`) and remove the S3 `uploadDist` target
+- [x] 6.5 Update axion-release tag prefix to `ict-`
 
 ## 7. Docs
 

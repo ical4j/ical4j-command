@@ -1,26 +1,51 @@
-# This workflow will build a Java project with Gradle
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+# JVM tests on every push and pull request, plus one native smoke run on linux x64. The full
+# native matrix runs only on release tags (release.yml), since native builds are slow.
 
-name: Java CI with Gradle
+name: Build
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 permissions: read-all
 
 jobs:
-  build:
-
+  test:
+    name: JVM tests
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
-      with:
-        java-version: 17
-#    - name: Grant execute permission for gradlew
-#      run: chmod +x gradlew
-    - name: Build with Gradle
-#      run: ./gradlew build
-      uses: eskatos/gradle-command-action@v1
-      with:
-        arguments: build
+      - uses: actions/checkout@v4
+        with:
+          # Full history + tags so axion-release resolves the version.
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Test and JVM smoke run
+        run: ./gradlew build jvmSmoke
+
+  native-smoke:
+    name: Native smoke (linux x64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '25'
+          distribution: graalvm-community
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build native executable
+        run: ./gradlew nativeCompile --no-configuration-cache
+
+      - name: Smoke suite
+        run: ./gradlew nativeSmoke --no-configuration-cache
+
+      - name: Startup time
+        run: ./gradlew nativeStartup --no-configuration-cache

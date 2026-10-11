@@ -1,6 +1,7 @@
 package org.ical4j.command.cli;
 
 import org.ical4j.command.config.CommandConfig;
+import org.ical4j.command.mcp.McpCommand;
 import org.ical4j.command.ops.Context;
 import org.ical4j.command.ops.OperationException;
 import org.ical4j.command.ops.Operations;
@@ -18,7 +19,8 @@ import java.util.function.Supplier;
 
 /**
  * The {@code ict} executable. The root command carries the global options; everything under it
- * is derived from the operation registry by {@link CommandTree}, apart from {@code config}.
+ * is derived from the operation registry by {@link CommandTree}, apart from {@code config} and
+ * {@code mcp}, which serves the same registry over MCP.
  * <p>
  * Exit codes: 0 success, 1 operation failure (not found, invalid data, store error), 2 usage
  * error. Results go to stdout; diagnostics go to stderr.
@@ -63,6 +65,9 @@ public class Main extends GlobalOptions {
             return OK;
         });
         cli.addSubcommand("config", ConfigCommand.create(lazyConfig));
+        // MCP owns stdin, so its handlers get an empty one.
+        cli.addSubcommand("mcp", McpCommand.create(registry,
+                () -> main.context(lazyConfig, InputStream.nullInputStream()), in, out));
         // After the subcommands exist: these setters propagate to the whole tree.
         cli.setOut(writer(out));
         cli.setErr(writer(err));

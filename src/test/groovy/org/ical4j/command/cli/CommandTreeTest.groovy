@@ -37,7 +37,7 @@ class CommandTreeTest extends Specification {
 
         then:
         code == 0
-        commands(out.toString()) == ['list', 'export', 'config']
+        commands(out.toString()) == ['list', 'export', 'config', 'mcp']
         err.toString().isEmpty()
     }
 
@@ -62,7 +62,7 @@ class CommandTreeTest extends Specification {
         run(reg, '--help')
 
         then:
-        commands(out.toString()) == ['list', 'config']
+        commands(out.toString()) == ['list', 'config', 'mcp']
     }
 
     def 'options are derived from parameter descriptors'() {

@@ -64,6 +64,7 @@ Handlers return domain objects (`Calendar`, `VCard`, lists of `Uid`, collection 
 Use `io.modelcontextprotocol.sdk:mcp` with `McpServer.sync(...)` and `SyncToolSpecification` built from the registry. Tool names are `<verb>_<type>` (for example `list_event`). No annotation-driven tool discovery.
 
 - **Why:** the SDK tracks the protocol; programmatic registration keeps reflection out; Jackson is already on the classpath through ical4j-serializer.
+- **As built (task 4.x):** SDK 2.0.1, as `mcp-core` plus `mcp-json-jackson2` rather than the `mcp` aggregate, which binds Jackson 3 and would put a second Jackson into the image. The stdio transport gives no end-of-stream signal, so `ict mcp` wraps stdin and returns when it reads EOF; the transport drops responses still queued at that moment, so clients must read each response before closing. Tool handlers get an empty stdin, so `import_*` over MCP needs the `file` argument. Tools carry `readOnlyHint`/`destructiveHint` annotations from their verb.
 - **Alternatives rejected:** Spring AI (Spring Boot runtime, AOT complexity, 100MB+ binaries); Quarkus mcp-server-stdio (absorbs native metadata pain but brings a full framework into a CLI; the T0 spike showed the metadata burden is 13 entries, so the fallback is not needed); hand-rolled JSON-RPC (protocol drifts).
 
 ### D6 — GraalVM native via `org.graalvm.buildtools.native`, decided by the T0 spike

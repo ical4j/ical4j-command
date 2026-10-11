@@ -10,6 +10,7 @@ slf4j = "2.0.17"
 spock = "2.4-M7-groovy-3.0"
 junitVintage = "5.14.1"
 picocli = "4.7.7"
+mcp = "2.0.1"
 
 [libraries]
 ical4j = { module = "org.mnode.ical4j:ical4j", version.ref = "ical4j" }
@@ -21,6 +22,11 @@ ical4j-serializer = { module = "org.ical4j:ical4j-serializer", version.ref = "ic
 
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
+
+# MCP Java SDK: core plus the Jackson 2 binding rather than the `mcp` aggregate, which binds
+# Jackson 3 and would put a second Jackson into the image next to ical4j-serializer's.
+mcp-core = { module = "io.modelcontextprotocol.sdk:mcp-core", version.ref = "mcp" }
+mcp-json-jackson2 = { module = "io.modelcontextprotocol.sdk:mcp-json-jackson2", version.ref = "mcp" }
 
 night-config-toml = { group = "com.electronwill.night-config", name = "toml", version = "3.8.3"}
 

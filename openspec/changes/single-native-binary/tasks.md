@@ -36,12 +36,12 @@
 
 ## 4. MCP surface
 
-- [ ] 4.1 Add `io.modelcontextprotocol.sdk:mcp`; implement `ict mcp` with `McpServer.sync` on stdio
-- [ ] 4.2 Tool builder: `<verb>_<type>` name, JSON schema from `Param` descriptors, exposure flag respected
-- [ ] 4.3 Content renderers: calendar/card as text, lists and descriptors as JSON text, handler errors as `isError` results
-- [ ] 4.4 Route picocli output and logging to stderr while `mcp` runs
-- [ ] 4.5 Spec with a scripted stdio client: initialize, tools/list, tools/call for a first-cohort tool, clean shutdown on EOF
-- [ ] 4.6 Spec asserting every stdout line is valid JSON-RPC while verbose logging is on
+- [x] 4.1 Add `io.modelcontextprotocol.sdk:mcp`; implement `ict mcp` with `McpServer.sync` on stdio
+- [x] 4.2 Tool builder: `<verb>_<type>` name, JSON schema from `Param` descriptors, exposure flag respected
+- [x] 4.3 Content renderers: calendar/card as text, lists and descriptors as JSON text, handler errors as `isError` results
+- [x] 4.4 Route picocli output and logging to stderr while `mcp` runs
+- [x] 4.5 Spec with a scripted stdio client: initialize, tools/list, tools/call for a first-cohort tool, clean shutdown on EOF
+- [x] 4.6 Spec asserting every stdout line is valid JSON-RPC while verbose logging is on
 
 ## 5. Native build
 

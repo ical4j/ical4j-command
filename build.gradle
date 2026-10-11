@@ -66,6 +66,9 @@ dependencies {
 
     implementation libs.picocli, libs.night.config.toml
 
+    // `ict mcp`: stdio server with programmatic tool registration.
+    implementation libs.mcp.core, libs.mcp.json.jackson2
+
     // Logging: slf4j-simple to stderr only. stdout is reserved for command output and,
     // under `ict mcp`, for the protocol stream. Level is chosen in cli.Main before any
     // logger is created (see LogLevel).
